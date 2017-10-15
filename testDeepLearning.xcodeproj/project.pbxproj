@@ -15,6 +15,8 @@
 		9124B9751F934226002E91CD /* testDeepLearningTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9124B9741F934226002E91CD /* testDeepLearningTests.swift */; };
 		9124B9801F934242002E91CD /* Gate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9124B97F1F934242002E91CD /* Gate.swift */; };
 		91A77DA61F934D4100BF2738 /* Surge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 91A77DA51F934D4100BF2738 /* Surge.framework */; };
+		91A77DA91F93541E00BF2738 /* Activation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91A77DA81F93541E00BF2738 /* Activation.swift */; };
+		91A77DAB1F93558A00BF2738 /* Network.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91A77DAA1F93558A00BF2738 /* Network.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -40,6 +42,8 @@
 		9124B9761F934226002E91CD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9124B97F1F934242002E91CD /* Gate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Gate.swift; sourceTree = "<group>"; };
 		91A77DA51F934D4100BF2738 /* Surge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Surge.framework; path = Carthage/Build/iOS/Surge.framework; sourceTree = "<group>"; };
+		91A77DA81F93541E00BF2738 /* Activation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Activation.swift; sourceTree = "<group>"; };
+		91A77DAA1F93558A00BF2738 /* Network.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Network.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -90,6 +94,8 @@
 				9124B9681F934226002E91CD /* LaunchScreen.storyboard */,
 				9124B96B1F934226002E91CD /* Info.plist */,
 				9124B97F1F934242002E91CD /* Gate.swift */,
+				91A77DAA1F93558A00BF2738 /* Network.swift */,
+				91A77DA81F93541E00BF2738 /* Activation.swift */,
 			);
 			path = testDeepLearning;
 			sourceTree = "<group>";
@@ -235,8 +241,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				9124B9621F934226002E91CD /* ViewController.swift in Sources */,
+				91A77DA91F93541E00BF2738 /* Activation.swift in Sources */,
 				9124B9801F934242002E91CD /* Gate.swift in Sources */,
 				9124B9601F934226002E91CD /* AppDelegate.swift in Sources */,
+				91A77DAB1F93558A00BF2738 /* Network.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

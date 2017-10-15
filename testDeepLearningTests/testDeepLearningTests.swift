@@ -52,4 +52,13 @@ class testDeepLearningTests: XCTestCase {
         XCTAssertTrue(1.0 == gate.XOR(x1: 0.0, x2: 1.0))
         XCTAssertTrue(0.0 == gate.XOR(x1: 1.0, x2: 1.0))
     }
+    
+    func testNetwork() {
+        let network = Network()
+        let x = [1.0, 0.5]
+        var y = network.forword(x)
+    
+        XCTAssertTrue(0.31682708 == Float(y[0])) //0.31682707641102981
+        XCTAssertTrue(0.69627909 == Float(y[1])) //0.69627908986196685
+    }
 }
