@@ -61,4 +61,20 @@ class testDeepLearningTests: XCTestCase {
         XCTAssertTrue(0.31682708 == Float(y[0])) //0.31682707641102981
         XCTAssertTrue(0.69627909 == Float(y[1])) //0.69627908986196685
     }
+    
+    func test_mean_squared_error() {
+        let t:[Double] = [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0]
+        let y = [0.1, 0.05, 0.6, 0.0, 0.05, 0.1, 0.0, 0.1, 0.0, 0.0]
+        let ret = mean_squared_error(y: y, t: t)
+        debugPrint(ret)
+        XCTAssert(0.097500000000000031 == ret)
+    }
+    
+    func test_mean_squared_error2() {
+        let t:[Double] = [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0]
+        let y = [0.1, 0.05, 0.1, 0.0, 0.05, 0.1, 0.0, 0.6, 0.0, 0.0]
+        let ret = mean_squared_error(y: y, t: t)
+        debugPrint(ret)
+        XCTAssert(0.59750000000000003 == ret)
+    }
 }

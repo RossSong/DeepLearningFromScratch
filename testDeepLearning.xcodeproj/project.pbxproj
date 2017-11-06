@@ -14,7 +14,8 @@
 		9124B96A1F934226002E91CD /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9124B9681F934226002E91CD /* LaunchScreen.storyboard */; };
 		9124B9751F934226002E91CD /* testDeepLearningTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9124B9741F934226002E91CD /* testDeepLearningTests.swift */; };
 		9124B9801F934242002E91CD /* Gate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9124B97F1F934242002E91CD /* Gate.swift */; };
-		91A77DA61F934D4100BF2738 /* Surge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 91A77DA51F934D4100BF2738 /* Surge.framework */; };
+		9146F0AF1FA9D5BD00769F8F /* loss.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9146F0AE1FA9D5BD00769F8F /* loss.swift */; };
+		9149D7F61FB0146000402A9C /* Upsurge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9149D7F51FB0146000402A9C /* Upsurge.framework */; };
 		91A77DA91F93541E00BF2738 /* Activation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91A77DA81F93541E00BF2738 /* Activation.swift */; };
 		91A77DAB1F93558A00BF2738 /* Network.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91A77DAA1F93558A00BF2738 /* Network.swift */; };
 /* End PBXBuildFile section */
@@ -41,6 +42,8 @@
 		9124B9741F934226002E91CD /* testDeepLearningTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = testDeepLearningTests.swift; sourceTree = "<group>"; };
 		9124B9761F934226002E91CD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9124B97F1F934242002E91CD /* Gate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Gate.swift; sourceTree = "<group>"; };
+		9146F0AE1FA9D5BD00769F8F /* loss.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = loss.swift; sourceTree = "<group>"; };
+		9149D7F51FB0146000402A9C /* Upsurge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Upsurge.framework; path = Carthage/Build/iOS/Upsurge.framework; sourceTree = "<group>"; };
 		91A77DA51F934D4100BF2738 /* Surge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Surge.framework; path = Carthage/Build/iOS/Surge.framework; sourceTree = "<group>"; };
 		91A77DA81F93541E00BF2738 /* Activation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Activation.swift; sourceTree = "<group>"; };
 		91A77DAA1F93558A00BF2738 /* Network.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Network.swift; sourceTree = "<group>"; };
@@ -51,7 +54,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				91A77DA61F934D4100BF2738 /* Surge.framework in Frameworks */,
+				9149D7F61FB0146000402A9C /* Upsurge.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -96,6 +99,7 @@
 				9124B97F1F934242002E91CD /* Gate.swift */,
 				91A77DAA1F93558A00BF2738 /* Network.swift */,
 				91A77DA81F93541E00BF2738 /* Activation.swift */,
+				9146F0AE1FA9D5BD00769F8F /* loss.swift */,
 			);
 			path = testDeepLearning;
 			sourceTree = "<group>";
@@ -112,6 +116,7 @@
 		91A77DA41F934D4000BF2738 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				9149D7F51FB0146000402A9C /* Upsurge.framework */,
 				91A77DA51F934D4100BF2738 /* Surge.framework */,
 			);
 			name = Frameworks;
@@ -225,7 +230,7 @@
 			files = (
 			);
 			inputPaths = (
-				"$(SRCROOT)/Carthage/Build/iOS/Surge.framework",
+				"$(SRCROOT)/Carthage/Build/iOS/Upsurge.framework",
 			);
 			outputPaths = (
 			);
@@ -240,6 +245,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9146F0AF1FA9D5BD00769F8F /* loss.swift in Sources */,
 				9124B9621F934226002E91CD /* ViewController.swift in Sources */,
 				91A77DA91F93541E00BF2738 /* Activation.swift in Sources */,
 				9124B9801F934242002E91CD /* Gate.swift in Sources */,

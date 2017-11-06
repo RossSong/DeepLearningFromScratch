@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import Surge
+import Upsurge
 
 class Gate {
     func oldAND(x1: Float, x2: Float) -> Float {
@@ -28,7 +28,7 @@ class Gate {
         let w: [Double] = [0.5, 0.5]
         let b = -0.7
         
-        let tmp = Surge.sum( w * x ) + b
+        let tmp = Upsurge.sum( w * x ) + b
         
         if tmp <= 0 {
             return 0
@@ -42,7 +42,7 @@ class Gate {
         let w: [Double] = [-0.5, -0.5]
         let b = 0.7
         
-        let tmp = Surge.sum( w * x ) + b
+        let tmp = Upsurge.sum( w * x ) + b
         
         if tmp <= 0 {
             return 0
@@ -56,7 +56,7 @@ class Gate {
         let w: [Double] = [0.5, 0.5]
         let b = -0.2
         
-        let tmp = Surge.sum( w * x ) + b
+        let tmp = Upsurge.sum( w * x ) + b
         
         if tmp <= 0 {
             return 0
