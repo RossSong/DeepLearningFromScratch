@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		910DBF4A1FC70ECF00AE8EF2 /* softmax.swift in Sources */ = {isa = PBXBuildFile; fileRef = 910DBF491FC70ECF00AE8EF2 /* softmax.swift */; };
+		910DBF4B1FC7110600AE8EF2 /* Upsurge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9149D7F51FB0146000402A9C /* Upsurge.framework */; };
 		9124B9601F934226002E91CD /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9124B95F1F934226002E91CD /* AppDelegate.swift */; };
 		9124B9621F934226002E91CD /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9124B9611F934226002E91CD /* ViewController.swift */; };
 		9124B9651F934226002E91CD /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9124B9631F934226002E91CD /* Main.storyboard */; };
@@ -31,6 +33,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		910DBF491FC70ECF00AE8EF2 /* softmax.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = softmax.swift; sourceTree = "<group>"; };
 		9124B95C1F934226002E91CD /* testDeepLearning.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = testDeepLearning.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9124B95F1F934226002E91CD /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		9124B9611F934226002E91CD /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -62,6 +65,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				910DBF4B1FC7110600AE8EF2 /* Upsurge.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -100,6 +104,7 @@
 				91A77DAA1F93558A00BF2738 /* Network.swift */,
 				91A77DA81F93541E00BF2738 /* Activation.swift */,
 				9146F0AE1FA9D5BD00769F8F /* loss.swift */,
+				910DBF491FC70ECF00AE8EF2 /* softmax.swift */,
 			);
 			path = testDeepLearning;
 			sourceTree = "<group>";
@@ -250,6 +255,7 @@
 				91A77DA91F93541E00BF2738 /* Activation.swift in Sources */,
 				9124B9801F934242002E91CD /* Gate.swift in Sources */,
 				9124B9601F934226002E91CD /* AppDelegate.swift in Sources */,
+				910DBF4A1FC70ECF00AE8EF2 /* softmax.swift in Sources */,
 				91A77DAB1F93558A00BF2738 /* Network.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -427,6 +433,10 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				DEVELOPMENT_TEAM = E8L5ANYMCR;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
+				);
 				INFOPLIST_FILE = testDeepLearningTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.happyCodingCompany.testDeepLearningTests;
@@ -442,6 +452,10 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				DEVELOPMENT_TEAM = E8L5ANYMCR;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
+				);
 				INFOPLIST_FILE = testDeepLearningTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.happyCodingCompany.testDeepLearningTests;

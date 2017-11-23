@@ -7,6 +7,7 @@
 //
 
 import XCTest
+import Upsurge
 @testable import testDeepLearning
 
 class testDeepLearningTests: XCTestCase {
@@ -76,5 +77,21 @@ class testDeepLearningTests: XCTestCase {
         let ret = mean_squared_error(y: y, t: t)
         debugPrint(ret)
         XCTAssert(0.59750000000000003 == ret)
+    }
+    
+    func testSoftMax() {
+        let a = ValueArray<Double>([0.3, 2.9, 4.0])
+        let y = softmax(a)
+        XCTAssert(y[0] == 0.018211273295547531)
+        XCTAssert(y[1] == 0.24519181293507392)
+        XCTAssert(y[2] == 0.73659691376937864)
+    }
+    
+    func testSoftMax2() {
+        let a = ValueArray<Double>([1010, 1000, 990])
+        let y = softmax(a)
+        XCTAssert(y[0] == 0.99995460007033099)
+        XCTAssert(y[1] == 4.5397868608866649e-05)
+        XCTAssert(y[2] == 2.0610600462090622e-09)
     }
 }
