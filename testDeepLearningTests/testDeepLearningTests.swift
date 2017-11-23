@@ -94,4 +94,16 @@ class testDeepLearningTests: XCTestCase {
         XCTAssert(y[1] == 4.5397868608866649e-05)
         XCTAssert(y[2] == 2.0610600462090622e-09)
     }
+    
+    func testLoadMNIST() {
+        let tensor = Tensor<Double>(dimensions:[(28*28)], repeatedValue: 0.0)
+        let k = tensor.asMatrix(0...(28*28-1),0...0)
+        let ((x,y), (tx,ty)) = load_mnist(flatten: true, normalize: false)
+        let a = x * k
+        let b = tx * k
+        XCTAssert(8000 == a.rows)
+        XCTAssert(1 == a.columns)
+        XCTAssert(2000 == b.rows)
+        XCTAssert(1 == b.columns)
+    }
 }
