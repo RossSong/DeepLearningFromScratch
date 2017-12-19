@@ -26,6 +26,8 @@
 		9149D7F61FB0146000402A9C /* Upsurge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9149D7F51FB0146000402A9C /* Upsurge.framework */; };
 		91A77DA91F93541E00BF2738 /* Activation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91A77DA81F93541E00BF2738 /* Activation.swift */; };
 		91A77DAB1F93558A00BF2738 /* Network.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91A77DAA1F93558A00BF2738 /* Network.swift */; };
+		91CEA6361FE9383200BB601B /* Random.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91CEA6351FE9383200BB601B /* Random.swift */; };
+		91CEA6381FE938B500BB601B /* Network2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91CEA6371FE938B500BB601B /* Network2.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -62,6 +64,8 @@
 		91A77DA51F934D4100BF2738 /* Surge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Surge.framework; path = Carthage/Build/iOS/Surge.framework; sourceTree = "<group>"; };
 		91A77DA81F93541E00BF2738 /* Activation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Activation.swift; sourceTree = "<group>"; };
 		91A77DAA1F93558A00BF2738 /* Network.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Network.swift; sourceTree = "<group>"; };
+		91CEA6351FE9383200BB601B /* Random.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Random.swift; sourceTree = "<group>"; };
+		91CEA6371FE938B500BB601B /* Network2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Network2.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -127,6 +131,8 @@
 				9124B96B1F934226002E91CD /* Info.plist */,
 				9124B97F1F934242002E91CD /* Gate.swift */,
 				91A77DAA1F93558A00BF2738 /* Network.swift */,
+				91CEA6371FE938B500BB601B /* Network2.swift */,
+				91CEA6351FE9383200BB601B /* Random.swift */,
 				91A77DA81F93541E00BF2738 /* Activation.swift */,
 				9146F0AE1FA9D5BD00769F8F /* loss.swift */,
 				910DBF491FC70ECF00AE8EF2 /* softmax.swift */,
@@ -282,6 +288,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9146F0AF1FA9D5BD00769F8F /* loss.swift in Sources */,
+				91CEA6381FE938B500BB601B /* Network2.swift in Sources */,
 				910DBF4D1FC714B300AE8EF2 /* MNIST.swift in Sources */,
 				9124B9621F934226002E91CD /* ViewController.swift in Sources */,
 				910DBF4F1FC71E8100AE8EF2 /* MNISTData.swift in Sources */,
@@ -290,6 +297,7 @@
 				9124B9601F934226002E91CD /* AppDelegate.swift in Sources */,
 				910DBF4A1FC70ECF00AE8EF2 /* softmax.swift in Sources */,
 				91A77DAB1F93558A00BF2738 /* Network.swift in Sources */,
+				91CEA6361FE9383200BB601B /* Random.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

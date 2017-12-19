@@ -106,4 +106,10 @@ class testDeepLearningTests: XCTestCase {
         XCTAssert(2000 == b.rows)
         XCTAssert(1 == b.columns)
     }
+    
+    func testCrossEntropyError() {
+        let ret = crossEntropyError(y: Tensor<Double>(Matrix<Double>([[1.0,2.0,3.0], [1.0,2.0,3.0]])), t:Tensor<Double>(Matrix<Double>([[1.0,3.0,2.0], [1.0,3.0,2.0]])))
+        debugPrint(ret)
+        XCTAssert(-4.2766661190160544 == ret)
+    }
 }
