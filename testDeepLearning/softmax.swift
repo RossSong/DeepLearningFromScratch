@@ -9,11 +9,11 @@
 import Foundation
 import Upsurge
 
-func softmax(_ a:ValueArray<Double>) -> ValueArray<Double> {
-    let c = max(a)
-    let exp_a = exp(a - c)
+func softmax(_ a:Tensor<Double>) -> Tensor<Double> {
+    let c = max(a.elements)
+    let exp_a = exp(a.elements - c)
     let sum_exp_a = sum(exp_a)
     let y = exp_a / sum_exp_a
     
-    return y
+    return Tensor<Double>(y.toRowMatrix())
 }

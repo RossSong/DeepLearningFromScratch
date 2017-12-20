@@ -9,7 +9,11 @@
 import Foundation
 import Upsurge
 
-let None = -1
+let None: Double = -1
+
+func argmax(x: Tensor<Double>) -> Tensor<Int> {
+    
+}
 
 class Relu {
     func forward(x: Tensor<Double>) -> Tensor<Double> {
@@ -89,43 +93,78 @@ func crossEntropyError(y: Tensor<Double>, t: Tensor<Double>) -> Double {
     return -1 * Upsurge.sum(t.elements * Upsurge.log(y.elements)) / batch_size
 }
 
-//class SoftMaxWithLoss {
-//    var loss: Double = None
-//    var y: Double = None
-//    var t: Double = None
-//
-//    func foward(x, t) -> Double {
-//        t = t
-//        y = softmax(x)
-//        loss = crossEntropyError(y, t)
-//        return loss
-//    }
-//
-//    func backward(dout = 1) {
-//        batch_size = t.shape[0]
-//        dx = (y - t) / batch_size
-//        return dx
-//    }
-//}
-//
-//class Network2 {
-//    var params: Dictionary<String, Tensor<Double>>!
-//    var layers:  [Int: [String: Any]]?
-//    var lastLayer: Any?
-//
-//    init(inputSize: Int, hiddeSize: Int, outputSize: Int, weightInitStd: Double = 0.01) {
-//        params = Dictionary<String, Tensor<Double>>()
-//        params["W1"] = weightInitStd * MyRandomGenerator.randn(inputSize: inputSize, outputSize: hiddeSize)
-//        params["b1"] = Tensor<Double>(rows: 1, columns: hiddeSize, repeatedValue: 0.0)
-//        params["W2"] = weightInitStd * MyRandomGenerator.randn(inputSize: hiddeSize, outputSize: outputSize)
-//        params["b2"] = Tensor<Double>(rows: 1, columns: outputSize, repeatedValue: 0.0)
-//
-//        self.layers = Dictionary<Int, Dictionary<String, Any>>()
-//        self.layers![0]!["Affine1"] = Affine(W: params!["W1"], b: params!["b1"])
-//        self.layers![1]!["Relu1"] = Relu()
-//        self.layers![2]!["Affine2"] = Affine(W: params!["W2"], b: params!["b2"])
-//
-//        self.lastLayer = SoftMaxWithLoss()
-//    }
-//}
+class SoftMaxWithLoss {
+    var loss: Double = None
+    var y: Tensor<Double>?
+    var t: Tensor<Double>?
+
+    func forward(x: Tensor<Double>, t: Tensor<Double>) -> Double {
+        self.t = t
+        let y = softmax(x)
+        self.y = y
+        loss = crossEntropyError(y: y, t: t)
+        return loss
+    }
+
+    func backward(dout: Double = 1) -> Tensor<Double> {
+        guard let y = y,  let t = t else { return Tensor<Double>(dimensions: [1]) }
+        let batch_size = Double(t.dimensions[0])
+        let dx = (y.elements - t.elements) / batch_size
+        return Tensor<Double>(dx.toRowMatrix())
+    }
+}
+
+class Network2 {
+    var params: Dictionary<String, Tensor<Double>>!
+    var layers:  [Int: Any]!
+    var lastLayer: SoftMaxWithLoss!
+
+    init(inputSize: Int, hiddeSize: Int, outputSize: Int, weightInitStd: Double = 0.01) {
+        params = Dictionary<String, Tensor<Double>>()
+        
+        let randW1 = MyRandomGenerator.randn(inputSize: inputSize, outputSize: hiddeSize)
+        let weightedRandW1 = weightInitStd * randW1.elements
+        params["W1"] = Tensor<Double>(weightedRandW1.toRowMatrix())
+        params["b1"] = Tensor<Double>(ValueArray<Double>(count: hiddeSize, repeatedValue: 0.0).toRowMatrix())
+        
+        let randW2 = MyRandomGenerator.randn(inputSize: hiddeSize, outputSize: outputSize)
+        let weightedRandW2 = weightInitStd * randW2.elements
+        params["W2"] = Tensor<Double>(weightedRandW2.toRowMatrix())
+        params["b2"] = Tensor<Double>(ValueArray<Double>(count: outputSize, repeatedValue: 0.0).toRowMatrix())
+
+        self.layers = [Int: [String: Any]]()
+        self.layers[0] = Affine(W: params["W1"]!, b: params["b1"]!)
+        self.layers[1] = Relu()
+        self.layers[2] = Affine(W: params["W2"]!, b: params["b2"]!)
+
+        self.lastLayer = SoftMaxWithLoss()
+    }
+    
+    func predict(x: Tensor<Double>) -> Tensor<Double> {
+        var x: Tensor<Double>?
+        
+        for i in 0..<self.layers.count {
+            if let layer = self.layers[i] as? Affine {
+                x = layer.forward(x: x!)
+            }
+            else if let layer = self.layers[i] as? Relu {
+                x = layer.forward(x: x!)
+            }
+        }
+        
+        return x!
+    }
+    
+    func loss(x: Tensor<Double>, t: Tensor<Double>) -> Double {
+        let y = predict(x: x)
+        return self.lastLayer.forward(x:y, t:t)
+    }
+    
+    func accuracy(x: Tensor<Double>, t: Tensor<Double>) {
+        var y = self.predict(x: x)
+        
+        for
+    }
+}
+
 

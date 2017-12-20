@@ -81,7 +81,7 @@ class testDeepLearningTests: XCTestCase {
     
     func testSoftMax() {
         let a = ValueArray<Double>([0.3, 2.9, 4.0])
-        let y = softmax(a)
+        let y = softmax(Tensor<Double>(a.toRowMatrix()))
         XCTAssert(y[0] == 0.018211273295547531)
         XCTAssert(y[1] == 0.24519181293507392)
         XCTAssert(y[2] == 0.73659691376937864)
@@ -89,7 +89,7 @@ class testDeepLearningTests: XCTestCase {
     
     func testSoftMax2() {
         let a = ValueArray<Double>([1010, 1000, 990])
-        let y = softmax(a)
+        let y = softmax(Tensor<Double>(a.toRowMatrix()))
         XCTAssert(y[0] == 0.99995460007033099)
         XCTAssert(y[1] == 4.5397868608866649e-05)
         XCTAssert(y[2] == 2.0610600462090622e-09)
@@ -111,5 +111,11 @@ class testDeepLearningTests: XCTestCase {
         let ret = crossEntropyError(y: Tensor<Double>(Matrix<Double>([[1.0,2.0,3.0], [1.0,2.0,3.0]])), t:Tensor<Double>(Matrix<Double>([[1.0,3.0,2.0], [1.0,3.0,2.0]])))
         debugPrint(ret)
         XCTAssert(-4.2766661190160544 == ret)
+    }
+    
+    func testNetwork2() {
+        let network = Network2(inputSize: 2, hiddeSize: 3, outputSize: 1)
+        
+        
     }
 }
