@@ -113,9 +113,83 @@ class testDeepLearningTests: XCTestCase {
         XCTAssert(-4.2766661190160544 == ret)
     }
     
-    func testNetwork2() {
-        let network = Network2(inputSize: 2, hiddeSize: 3, outputSize: 1)
-        
-        
+    func testCrossEntropyError2() {
+        let ret = crossEntropyError(y: Tensor<Double>(Matrix<Double>([[1.0,2.0,3.0]])), t:Tensor<Double>(Matrix<Double>([[1.0,4.0,5.0]])))
+        debugPrint(ret)
+        XCTAssert(-8.2656501655803289 == ret)
     }
+    
+    func testRelu() {
+        let x = Tensor<Double>(Matrix([[-1, -2, 3]]))
+        let y = Relu().forward(x: x)
+        debugPrint(y)
+    }
+    
+    func loss(W: Tensor<Double>) -> Double {
+        let y = Tensor<Double>(Matrix([[0.1, 0.2, 0.7]]))
+        let t = Tensor<Double>(Matrix([[0.1, 0.2, 0.7]]))
+        return SoftMaxWithLoss().forward(x: y, t: t)
+    }
+    
+    func function_2(x: Tensor<Double>) -> Double {
+        let a = (x.elements[0] * x.elements[0])
+        let b = (x.elements[1] * x.elements[1])
+        return  a + b
+    }
+    
+    func doXCTAssert(_ value: Double,_ target: Double) {
+        XCTAssert(target < value + 0.0001 && target > value - 0.0001)
+    }
+
+    func testNumericalGradient() {
+        var x = Tensor<Double>(Matrix([[3.0, 4.0]]))
+        var ret = numericalGradient(f: function_2, x: x)
+        doXCTAssert(6.0, ret[0])
+        doXCTAssert(8.0, ret[1])
+        
+        x = Tensor<Double>(Matrix([[0.0, 2.0]]))
+        ret = numericalGradient(f: function_2, x: x)
+        doXCTAssert(0.0, ret[0])
+        doXCTAssert(4.0, ret[1])
+        
+        x = Tensor<Double>(Matrix([[3.0, 0.0]]))
+        ret = numericalGradient(f: function_2, x: x)
+        doXCTAssert(6.0, ret[0])
+        doXCTAssert(0.0, ret[1])
+    }
+    
+    func testNetwork2() {
+        let tensor = Tensor<Double>(dimensions:[(28*28)], repeatedValue: 0.0)
+        let k = tensor.asMatrix(0...(28*28-1),0...0)
+        
+        let ((x_train, t_train), (x_test, t_test)) = load_mnist(flatten: true, normalize: false)
+        
+        let network = Network2(inputSize: 784, hiddeSize: 50, outputSize: 10)
+        
+        let x_batch = ValueArray<Double>(capacity: 784 * 3)
+//        var count = 0
+//        for i in 0..<784 * 3 {
+//            x_batch.append(x_train.elements[i])
+//        }
+//        
+//        let t_batch = ValueArray<Double>(capacity: 784 * 3)
+//        for i in 0..<784 * 3 {
+//            t_batch.append(t_train[i])
+//        }
+//        
+//        let tensorXTrain = Tensor<Double>(Matrix<Double>(x_batch))
+//        let tensorTTrain = Tensor<Double>(Matrix<Double>(t_batch))
+//        
+//        let gradNumerical = network.numerical_gradient(x: x_batch, t: t_batch)
+//        let gradBackProp = network.gradient(x: x_batch, t: t_batch)
+//        
+//        for key in gradNumerical {
+//            let a = gradBackProp[key] as Tensor<Double>
+//            let b = gradNumerical[key] as Tensor<Double>
+//            let diff = Upsurge.mean(Upsurge.abs(a - b))
+//            debugPrint("\(key): \(diff)")
+//        }
+    
+    }
+
 }

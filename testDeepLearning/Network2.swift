@@ -11,8 +11,63 @@ import Upsurge
 
 let None: Double = -1
 
-func argmax(x: Tensor<Double>) -> Tensor<Int> {
+func argmax(x: Tensor<Double>) -> Tensor<Double> {
+    var max = 0.0
+    var index = 0
+    let y = x.copy()
     
+    //가장 큰 것만 1 나머지는 0
+    for i in 0..<x.elements.count {
+        if x.elements[i] > max {
+            max = x.elements[i]
+            index = i
+        }
+        
+        y.elements[i] = 0.0
+    }
+    
+    if y.elements.count >= index {
+        debugPrint("argmax error!!! out of index")
+    }
+    
+    y.elements[index] = 1.0
+    return y
+}
+
+func zeroLike(x: Tensor<Double>) -> ValueArray<Double> {
+    let ret = ValueArray<Double>(count: x.elements.count, repeatedValue: 0.0)
+    return ret
+}
+
+func boolEqualTensorSum(x: Tensor<Double>, y: Tensor<Double>) -> Double {
+    var total: Double = 0
+    for i in 0..<x.elements.count {
+        if x[i] == y[i] {
+            total = total + 1
+        }
+    }
+    
+    return total
+}
+
+func numericalGradient(f: ((_ x: Tensor<Double>) -> Double), x: Tensor<Double>) -> Tensor<Double>{
+    let h: Double = 0.0001
+    let grad = zeroLike(x: x)
+    
+    for idx in 0..<x.elements.count {
+        let tmpVal = x.elements[idx]
+        x.elements[idx] = tmpVal + h
+        let fxh1 = f(x)
+        
+        x.elements[idx] = tmpVal - h
+        let fxh2 = f(x)
+        
+        let tmp = (fxh1 - fxh2) / (2 * h)
+        grad[idx] = tmp
+        x.elements[idx] = tmpVal
+    }
+    
+    return Tensor<Double>(grad.toRowMatrix())
 }
 
 class Relu {
@@ -62,8 +117,8 @@ class Affine {
         return Tensor<Double>(out)
     }
     
-    func backward(dout: Tensor<Double>) -> Upsurge.Matrix<Double>{
-        guard let x = self.x else { debugPrint("error"); return Matrix<Double>([[0.0]]) }
+    func backward(dout: Tensor<Double>) -> Tensor<Double>{
+        guard let x = self.x else { debugPrint("error"); return Tensor<Double>(Matrix<Double>([[0.0]])) }
         
         let tDout = dout.asMatrix(0...dout.dimensions[0], 0...dout.dimensions[1])
         let transposeW = self.W.asMatrix(0...self.W.dimensions[1], 0...self.W.dimensions[0])
@@ -84,7 +139,7 @@ class Affine {
         
         self.db = tDb
         
-        return dx
+        return Tensor<Double>(dx)
     }
 }
 
@@ -116,7 +171,7 @@ class SoftMaxWithLoss {
 
 class Network2 {
     var params: Dictionary<String, Tensor<Double>>!
-    var layers:  [Int: Any]!
+    var layers:  [String: Any]!
     var lastLayer: SoftMaxWithLoss!
 
     init(inputSize: Int, hiddeSize: Int, outputSize: Int, weightInitStd: Double = 0.01) {
@@ -132,10 +187,10 @@ class Network2 {
         params["W2"] = Tensor<Double>(weightedRandW2.toRowMatrix())
         params["b2"] = Tensor<Double>(ValueArray<Double>(count: outputSize, repeatedValue: 0.0).toRowMatrix())
 
-        self.layers = [Int: [String: Any]]()
-        self.layers[0] = Affine(W: params["W1"]!, b: params["b1"]!)
-        self.layers[1] = Relu()
-        self.layers[2] = Affine(W: params["W2"]!, b: params["b2"]!)
+        self.layers = [String: Any]()
+        self.layers["Affine1"] = Affine(W: params["W1"]!, b: params["b1"]!)
+        self.layers["Relu1"] = Relu()
+        self.layers["Affine2"] = Affine(W: params["W2"]!, b: params["b2"]!)
 
         self.lastLayer = SoftMaxWithLoss()
     }
@@ -143,14 +198,12 @@ class Network2 {
     func predict(x: Tensor<Double>) -> Tensor<Double> {
         var x: Tensor<Double>?
         
-        for i in 0..<self.layers.count {
-            if let layer = self.layers[i] as? Affine {
-                x = layer.forward(x: x!)
-            }
-            else if let layer = self.layers[i] as? Relu {
-                x = layer.forward(x: x!)
-            }
-        }
+        let layerAffine1 = self.layers["Affine1"] as! Affine
+        x = layerAffine1.forward(x: x!)
+        let layerRelu1 = self.layers["Relu1"] as! Relu
+        x = layerRelu1.forward(x: x!)
+        let layerAffine2 = self.layers["Affine2"] as! Affine
+        x = layerAffine2.forward(x: x!)
         
         return x!
     }
@@ -160,10 +213,54 @@ class Network2 {
         return self.lastLayer.forward(x:y, t:t)
     }
     
-    func accuracy(x: Tensor<Double>, t: Tensor<Double>) {
+    func accuracy(x: Tensor<Double>, t: Tensor<Double>) -> Double {
         var y = self.predict(x: x)
+        var t = t
+        let newY = argmax(x: y)
         
-        for
+        if 1 != t.rank {
+            t = argmax(x: t)
+        }
+
+//        let accuracy = Upsurge.sum((y == t) / x.dimensions[0]
+        let accuracy = boolEqualTensorSum(x: newY, y: t) / Double(x.dimensions[0])
+        return accuracy
+    }
+
+    func numerical_gradient(x: Tensor<Double>, t: Tensor<Double>) -> [String: Any] {
+        func lossW(W: Tensor<Double>) -> Double {
+            return loss(x: x, t: t)
+        }
+        
+        var grads = [String: Any]()
+        grads["W1"] = numericalGradient(f: lossW, x: self.params["W1"]!)
+        grads["b1"] = numericalGradient(f: lossW, x: self.params["b1"]!)
+        grads["W2"] = numericalGradient(f: lossW, x: self.params["W2"]!)
+        grads["b2"] = numericalGradient(f: lossW, x: self.params["b2"]!)
+        
+        return grads
+    }
+    
+    func gradient(x: Tensor<Double>, t: Tensor<Double>) -> [String: Any] {
+        _ = self.loss(x: x, t: t)
+        
+        let tmp = ValueArray<Double>(count: t.count, repeatedValue: 1.0)
+        var dout: Tensor<Double> = Tensor<Double>(tmp.toRowMatrix())
+        
+        let layerAffine1 = self.layers["Affine2"] as! Affine
+        dout = layerAffine1.backward(dout: dout)
+        let layerRelu1 = self.layers["Relu1"] as! Relu
+        dout = layerRelu1.backward(dout: dout)
+        let layerAffine2 = self.layers["Affine1"] as! Affine
+        dout = layerAffine2.backward(dout: dout)
+        
+        var grads = [String: Any]()
+        grads["W1"] = (self.layers["Affine1"] as! Affine).dW
+        grads["b1"] = (self.layers["Affine1"] as! Affine).db
+        grads["W2"] = (self.layers["Affine2"] as! Affine).dW
+        grads["b2"] = (self.layers["Affine2"] as! Affine).db
+        
+        return grads
     }
 }
 
