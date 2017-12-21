@@ -104,8 +104,8 @@ class testDeepLearningTests: XCTestCase {
         
         let tA = x.asMatrix(0...((x.elements.count/(28*28)) - 1), 0...((28*28)-1))
         let a =  tA * k
-        let tB = tx.asMatrix(0...((x.elements.count/(28*28)) - 1), 0...((28*28)-1))
-        let b =  tB * k
+        let tB = tx.asMatrix(0...1999, 0...783)
+        let b = tB * k
         XCTAssert(8000 == a.rows)
         XCTAssert(1 == a.columns)
         XCTAssert(2000 == b.rows)
@@ -124,10 +124,20 @@ class testDeepLearningTests: XCTestCase {
         XCTAssert(-8.2656501655803289 == ret)
     }
     
-    func testRelu() {
+    func testReluForword() {
         let x = Tensor<Double>(Matrix([[-1, -2, 3]]))
         let y = Relu().forward(x: x)
-        debugPrint(y)
+        XCTAssert(0 == y[0,0])
+        XCTAssert(0 == y[0,1])
+        XCTAssert(3 == y[0,2])
+    }
+    
+    func testReluBackword() {
+        let x = Tensor<Double>(Matrix([[-1, -2, 3]]))
+        let y = Relu().backward(dout: x)
+        XCTAssert(0 == y[0,0])
+        XCTAssert(0 == y[0,1])
+        XCTAssert(3 == y[0,2])
     }
     
     func loss(W: Tensor<Double>) -> Double {
@@ -164,11 +174,7 @@ class testDeepLearningTests: XCTestCase {
     }
     
     func testNetwork2() {
-        let tensor = Tensor<Double>(dimensions:[(28*28)], repeatedValue: 0.0)
-        let k = tensor.asMatrix(0...(28*28-1),0...0)
-        
         let ((x_train, t_train), (x_test, t_test)) = load_mnist(flatten: true, normalize: false)
-        
         let network = Network2(inputSize: 784, hiddeSize: 50, outputSize: 10)
         
         let x_batch = ValueArray<Double>(capacity: 784 * 3)
@@ -183,26 +189,22 @@ class testDeepLearningTests: XCTestCase {
             t_batch.append(t_train.elements[i])
         }
         
-//        let tensorXBatch = Tensor<Double>(x_batch)
-//        let tensorTBatch = Tensor<Double>(t_batch)
+        let tensorXBatch = Tensor<Double>(Matrix<Double>(rows:3, columns:784, elements:x_batch))
+        let tensorTBatch = Tensor<Double>(Matrix<Double>(rows:3, columns:1, elements:t_batch))
 
-//        let t_batch = ValueArray<Double>(capacity: 784 * 3)
-//        for i in 0..<784 * 3 {
-//            t_batch.append(t_train[i])
-//        }
-//
-//        let tensorXTrain = Tensor<Double>(Matrix<Double>(x_batch))
-//        let tensorTTrain = Tensor<Double>(Matrix<Double>(t_batch))
-//
-//        let gradNumerical = network.numerical_gradient(x: x_batch, t: t_batch)
-//        let gradBackProp = network.gradient(x: x_batch, t: t_batch)
-//
-//        for key in gradNumerical {
-//            let a = gradBackProp[key] as Tensor<Double>
-//            let b = gradNumerical[key] as Tensor<Double>
-//            let diff = Upsurge.mean(Upsurge.abs(a - b))
-//            debugPrint("\(key): \(diff)")
-//        }
+        let gradNumerical = network.numerical_gradient(x: tensorXBatch, t: tensorTBatch)
+        let gradBackProp = network.gradient(x: tensorXBatch, t: tensorTBatch)
+
+        for key in gradNumerical.keys {
+            let a = gradBackProp[key] as! Tensor<Double>
+            let b = gradNumerical[key] as! Tensor<Double>
+            
+            let mA = a.elements
+            let mB = b.elements
+            let tmp = mA - mB
+            let diff = Upsurge.mean(Upsurge.abs(tmp))
+            debugPrint("\(key): \(diff)")
+        }
     
     }
 

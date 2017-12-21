@@ -71,12 +71,16 @@ func numericalGradient(f: ((_ x: Tensor<Double>) -> Double), x: Tensor<Double>) 
 }
 
 class Relu {
+    var dx: Tensor<Double>?
+    
     func forward(x: Tensor<Double>) -> Tensor<Double> {
         let out = x.copy()
         
-        for i in 0..<out.count {
-            if out[i] <= 0 {
-                out[i] = 0
+        for i in 0..<out.dimensions[0] {
+            for j in 0..<out.dimensions[1] {
+                if out.elements[i * out.dimensions[1] + j] <= 0 {
+                    out.elements[i * out.dimensions[1] + j] = 0
+                }
             }
         }
         
@@ -84,14 +88,21 @@ class Relu {
     }
     
     func backward(dout: Tensor<Double>) -> Tensor<Double> {
-        for i in 0..<dout.count {
-            if dout[i] <= 0 {
-                dout[i] = 0
+        for i in 0..<dout.dimensions[0] {
+            for j in 0..<dout.dimensions[1] {
+                if dout.elements[i * dout.dimensions[1] + j] <= 0 {
+                    dout.elements[i * dout.dimensions[1] + j] = 0
+                }
             }
         }
 
+        dx = dout
         return dout
     }
+}
+
+func toMatrix(_ x: Tensor<Double>) -> Matrix<Double> {
+    return Matrix<Double>(rows: x.dimensions[0], columns: x.dimensions[1], elements: x.elements)
 }
 
 class Affine {
@@ -109,32 +120,51 @@ class Affine {
     func forward(x: Tensor<Double>) -> Tensor<Double> {
         self.x = x
         
-        let tx = x.asMatrix(0...x.dimensions[0], 0...x.dimensions[1])
-        let tW = W.asMatrix(0...W.dimensions[0], 0...W.dimensions[1])
-        let tb = b.asMatrix(0...b.dimensions[0], 0...b.dimensions[1])
+        let tx = Matrix<Double>(rows:x.dimensions[0], columns:x.dimensions[1], elements: x.elements)
+        let tW = Matrix<Double>(rows:W.dimensions[0], columns:W.dimensions[1], elements: x.elements)
+        let tb = b.elements
         
-        let out = tx * tW + tb
+        let out = tx * tW
+        
+        //(tx * tw) + tb -> out + tb
+        for i in 0..<out.dimensions[0] {
+            for j in 0..<out.dimensions[1] {
+                out.elements[i * out.dimensions[1] + j] = out.elements[i * out.dimensions[1] + j] + tb[j]
+            }
+        }
+        
         return Tensor<Double>(out)
     }
     
-    func backward(dout: Tensor<Double>) -> Tensor<Double>{
-        guard let x = self.x else { debugPrint("error"); return Tensor<Double>(Matrix<Double>([[0.0]])) }
+    func transpose(_ x: Tensor<Double>) -> Tensor<Double> {
         
-        let tDout = dout.asMatrix(0...dout.dimensions[0], 0...dout.dimensions[1])
-        let transposeW = self.W.asMatrix(0...self.W.dimensions[1], 0...self.W.dimensions[0])
-        let transposeX = x.asMatrix(0...x.dimensions[1], 0...x.dimensions[0])
-        
-        let dx = tDout * transposeW
-        self.dW = Tensor(transposeX * tDout)
-        
-        let tDb = Tensor<Double>(dimensions: [tDout.dimensions[0], 1])
-        
-        for i in 0..<tDout.dimensions[0] {
-            var total: Double = 0
-            for j in 0..<tDout.dimensions[1] {
-                total = total + tDout[i,j]
+        let m = Tensor<Double>(Matrix(rows: x.dimensions[1], columns: x.dimensions[0]))
+        for i in 0..<x.dimensions[0] {
+            for j in 0..<x.dimensions[1] {
+                m[j, i] = x[i, j]
             }
-            tDb[i] = total
+        }
+        
+        return m
+    }
+    
+    func backward(dout: Tensor<Double>) -> Tensor<Double> {
+        let transposeW = toMatrix(transpose(W))
+        let transposeX = toMatrix(transpose(x!))
+        let mDout = toMatrix(dout)
+        
+        let dx = mDout * transposeW
+        let tmp = transposeX * mDout
+        self.dW = Tensor(tmp)
+        
+        let tDb = Tensor<Double>(dimensions: [1, dout.dimensions[1]])
+        
+        for i in 0..<dout.dimensions[0] {
+            var total: Double = 0
+            for j in 0..<dout.dimensions[1] {
+                total = total + dout[i,j]
+            }
+            tDb[0, i] = total
         }
         
         self.db = tDb
@@ -173,18 +203,19 @@ class Network2 {
     var params: Dictionary<String, Tensor<Double>>!
     var layers:  [String: Any]!
     var lastLayer: SoftMaxWithLoss!
+    var countOfClass = 10
 
     init(inputSize: Int, hiddeSize: Int, outputSize: Int, weightInitStd: Double = 0.01) {
         params = Dictionary<String, Tensor<Double>>()
         
         let randW1 = MyRandomGenerator.randn(inputSize: inputSize, outputSize: hiddeSize)
         let weightedRandW1 = weightInitStd * randW1.elements
-        params["W1"] = Tensor<Double>(weightedRandW1.toRowMatrix())
+        params["W1"] = Tensor<Double>(Matrix<Double>(rows: inputSize, columns: hiddeSize, elements: weightedRandW1))
         params["b1"] = Tensor<Double>(ValueArray<Double>(count: hiddeSize, repeatedValue: 0.0).toRowMatrix())
         
         let randW2 = MyRandomGenerator.randn(inputSize: hiddeSize, outputSize: outputSize)
         let weightedRandW2 = weightInitStd * randW2.elements
-        params["W2"] = Tensor<Double>(weightedRandW2.toRowMatrix())
+        params["W2"] = Tensor<Double>(Matrix<Double>(rows: hiddeSize, columns: outputSize, elements: weightedRandW2))
         params["b2"] = Tensor<Double>(ValueArray<Double>(count: outputSize, repeatedValue: 0.0).toRowMatrix())
 
         self.layers = [String: Any]()
@@ -193,28 +224,30 @@ class Network2 {
         self.layers["Affine2"] = Affine(W: params["W2"]!, b: params["b2"]!)
 
         self.lastLayer = SoftMaxWithLoss()
+        
+        countOfClass = outputSize
     }
     
-    func predict(x: Tensor<Double>) -> Tensor<Double> {
-        var x: Tensor<Double>?
+    func predict(_ xVal: Tensor<Double>) -> Tensor<Double> {
+        var x: Tensor<Double> = xVal
         
         let layerAffine1 = self.layers["Affine1"] as! Affine
-        x = layerAffine1.forward(x: x!)
+        x = layerAffine1.forward(x: x)
         let layerRelu1 = self.layers["Relu1"] as! Relu
-        x = layerRelu1.forward(x: x!)
+        x = layerRelu1.forward(x: x)
         let layerAffine2 = self.layers["Affine2"] as! Affine
-        x = layerAffine2.forward(x: x!)
+        x = layerAffine2.forward(x: x)
         
-        return x!
+        return x
     }
     
     func loss(x: Tensor<Double>, t: Tensor<Double>) -> Double {
-        let y = predict(x: x)
+        let y = predict(x)
         return self.lastLayer.forward(x:y, t:t)
     }
     
     func accuracy(x: Tensor<Double>, t: Tensor<Double>) -> Double {
-        var y = self.predict(x: x)
+        let y = self.predict(x)
         var t = t
         let newY = argmax(x: y)
         
@@ -244,9 +277,7 @@ class Network2 {
     func gradient(x: Tensor<Double>, t: Tensor<Double>) -> [String: Any] {
         _ = self.loss(x: x, t: t)
         
-        let tmp = ValueArray<Double>(count: t.count, repeatedValue: 1.0)
-        var dout: Tensor<Double> = Tensor<Double>(tmp.toRowMatrix())
-        
+        var dout = Tensor<Double>(Matrix<Double>(rows: t.dimensions[0], columns:countOfClass, elements: ValueArray<Double>(count:t.dimensions[0], repeatedValue: 1.0)))
         let layerAffine1 = self.layers["Affine2"] as! Affine
         dout = layerAffine1.backward(dout: dout)
         let layerRelu1 = self.layers["Relu1"] as! Relu
