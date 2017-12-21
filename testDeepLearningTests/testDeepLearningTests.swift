@@ -97,10 +97,15 @@ class testDeepLearningTests: XCTestCase {
     
     func testLoadMNIST() {
         let tensor = Tensor<Double>(dimensions:[(28*28)], repeatedValue: 0.0)
-        let k = tensor.asMatrix(0...(28*28-1),0...0)
+        let k = tensor.elements.toColumnMatrix()
+        debugPrint("rows:\(k.rows), cols:\(k.columns)")
+        
         let ((x,y), (tx,ty)) = load_mnist(flatten: true, normalize: false)
-        let a = x * k
-        let b = tx * k
+        
+        let tA = x.asMatrix(0...((x.elements.count/(28*28)) - 1), 0...((28*28)-1))
+        let a =  tA * k
+        let tB = tx.asMatrix(0...((x.elements.count/(28*28)) - 1), 0...((28*28)-1))
+        let b =  tB * k
         XCTAssert(8000 == a.rows)
         XCTAssert(1 == a.columns)
         XCTAssert(2000 == b.rows)
@@ -167,22 +172,31 @@ class testDeepLearningTests: XCTestCase {
         let network = Network2(inputSize: 784, hiddeSize: 50, outputSize: 10)
         
         let x_batch = ValueArray<Double>(capacity: 784 * 3)
-//        var count = 0
-//        for i in 0..<784 * 3 {
-//            x_batch.append(x_train.elements[i])
-//        }
-//        
+        var count = 0
+        for i in 0..<784 * 3 {
+            x_batch.append(x_train.elements[i])
+        }
+        
+        let t_batch = ValueArray<Double>(capacity: 3)
+        count = 0
+        for i in 0..<3 {
+            t_batch.append(t_train.elements[i])
+        }
+        
+//        let tensorXBatch = Tensor<Double>(x_batch)
+//        let tensorTBatch = Tensor<Double>(t_batch)
+
 //        let t_batch = ValueArray<Double>(capacity: 784 * 3)
 //        for i in 0..<784 * 3 {
 //            t_batch.append(t_train[i])
 //        }
-//        
+//
 //        let tensorXTrain = Tensor<Double>(Matrix<Double>(x_batch))
 //        let tensorTTrain = Tensor<Double>(Matrix<Double>(t_batch))
-//        
+//
 //        let gradNumerical = network.numerical_gradient(x: x_batch, t: t_batch)
 //        let gradBackProp = network.gradient(x: x_batch, t: t_batch)
-//        
+//
 //        for key in gradNumerical {
 //            let a = gradBackProp[key] as Tensor<Double>
 //            let b = gradNumerical[key] as Tensor<Double>
