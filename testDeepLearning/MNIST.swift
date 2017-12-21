@@ -45,7 +45,7 @@ func load_mnist(flatten: Bool, normalize: Bool) -> ((Tensor<Double>, Tensor<Doub
     
     
     //return ((x_train, t_train), (x_test, t_test))
-    return ((tensorX, tensorTestX), (tensorY, tensorTestY))
+    return ((tensorX, tensorY), (tensorTestX, tensorTestY))
     
 }
 
