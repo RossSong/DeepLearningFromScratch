@@ -121,7 +121,7 @@ class Affine {
         self.x = x
         
         let tx = Matrix<Double>(rows:x.dimensions[0], columns:x.dimensions[1], elements: x.elements)
-        let tW = Matrix<Double>(rows:W.dimensions[0], columns:W.dimensions[1], elements: x.elements)
+        let tW = Matrix<Double>(rows:W.dimensions[0], columns:W.dimensions[1], elements: W.elements)
         let tb = b.elements
         
         let out = tx * tW
@@ -277,7 +277,8 @@ class Network2 {
     func gradient(x: Tensor<Double>, t: Tensor<Double>) -> [String: Any] {
         _ = self.loss(x: x, t: t)
         
-        var dout = Tensor<Double>(Matrix<Double>(rows: t.dimensions[0], columns:countOfClass, elements: ValueArray<Double>(count:t.dimensions[0], repeatedValue: 1.0)))
+        var dout = Tensor<Double>(Matrix<Double>(rows: t.dimensions[0],
+                                                 columns:countOfClass, elements: ValueArray<Double>(count:t.dimensions[0], repeatedValue: 1.0)))
         let layerAffine1 = self.layers["Affine2"] as! Affine
         dout = layerAffine1.backward(dout: dout)
         let layerRelu1 = self.layers["Relu1"] as! Relu
