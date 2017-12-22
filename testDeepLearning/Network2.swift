@@ -279,12 +279,12 @@ class Network2 {
         
         var dout = Tensor<Double>(Matrix<Double>(rows: t.dimensions[0],
                                                  columns:countOfClass, elements: ValueArray<Double>(count:t.dimensions[0], repeatedValue: 1.0)))
-        let layerAffine1 = self.layers["Affine2"] as! Affine
-        dout = layerAffine1.backward(dout: dout)
+        let layerAffine2 = self.layers["Affine2"] as! Affine
+        dout = layerAffine2.backward(dout: dout)
         let layerRelu1 = self.layers["Relu1"] as! Relu
         dout = layerRelu1.backward(dout: dout)
-        let layerAffine2 = self.layers["Affine1"] as! Affine
-        dout = layerAffine2.backward(dout: dout)
+        let layerAffine1 = self.layers["Affine1"] as! Affine
+        dout = layerAffine1.backward(dout: dout)
         
         var grads = [String: Any]()
         grads["W1"] = (self.layers["Affine1"] as! Affine).dW
