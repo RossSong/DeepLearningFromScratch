@@ -195,7 +195,7 @@ class SoftMaxWithLoss {
         guard let y = y,  let t = t else { return Tensor<Double>(dimensions: [1]) }
         let batch_size = Double(t.dimensions[0])
         let dx = (y.elements - t.elements) / batch_size
-        return Tensor<Double>(dx.toColumnMatrix())
+        return Tensor<Double>(Matrix(rows: y.dimensions[0], columns: y.dimensions[1], elements:dx))
     }
 }
 
