@@ -88,11 +88,10 @@ class testDeepLearningTests: XCTestCase {
     }
     
     func testSoftMax2() {
-        let a = ValueArray<Double>([1010, 1000, 990])
-        let y = softmax(Tensor<Double>(a.toRowMatrix()))
-        XCTAssert(y[0] == 0.99995460007033099)
-        XCTAssert(y[1] == 4.5397868608866649e-05)
-        XCTAssert(y[2] == 2.0610600462090622e-09)
+        let y = softmax(Tensor<Double>(Matrix<Double>([[1010], [1000],[990]])))
+        XCTAssert(y[0, 0] == 0.99995460007033099)
+        XCTAssert(y[1, 0] == 4.5397868608866649e-05)
+        XCTAssert(y[2, 0] == 2.0610600462090622e-09)
     }
     
 //    func testLoadMNIST() {
@@ -173,53 +172,72 @@ class testDeepLearningTests: XCTestCase {
         doXCTAssert(0.0, ret[1])
     }
     
-//    func testNetwork2() {
-//        let ((x_train, t_train), (x_test, t_test)) = load_mnist(flatten: true, normalize: false)
-//        let network = Network2(inputSize: 784, hiddeSize: 50, outputSize: 10)
-//
-//        let x_batch = ValueArray<Double>(capacity: 784 * 3)
-//        var count = 0
-//        for i in 0..<784 * 3 {
-//            x_batch.append(x_train.elements[i])
-//        }
-//
-//        let t_batch = ValueArray<Double>(capacity: 3)
-//        count = 0
-//        for i in 0..<3 {
-//            t_batch.append(t_train.elements[i])
-//        }
-//
-//        let tensorXBatch = Tensor<Double>(Matrix<Double>(rows:3, columns:784, elements:x_batch))
-//        let tensorTBatch = Tensor<Double>(Matrix<Double>(rows:3, columns:1, elements:t_batch))
-//
-//        let gradNumerical = network.numerical_gradient(x: tensorXBatch, t: tensorTBatch)
-//        let gradBackProp = network.gradient(x: tensorXBatch, t: tensorTBatch)
-//
-//        for key in gradNumerical.keys {
-//            let a = gradBackProp[key] as! Tensor<Double>
-//            let b = gradNumerical[key] as! Tensor<Double>
-//
-//            let mA = a.elements
-//            let mB = b.elements
-//            let tmp = mA - mB
-//            let diff = Upsurge.mean(Upsurge.abs(tmp))
-//            debugPrint("\(key): \(diff)")
-//        }
-//
-//    }
+    func testMulLayer() {
+        let apple: Double = 100
+        let apple_num: Double = 2
+        let tax: Double = 1.1
+        
+        let mul_apple_layer = MulLayer()
+        let mul_tax_layer = MulLayer()
+        
+        let apple_price = mul_apple_layer.forward(x: apple, y: apple_num)
+        let price = mul_tax_layer.forward(x: apple_price, y: tax)
+        
+        doXCTAssert(price, 220)
+    
+        let dPrice: Double = 1.0
+        let (dApplePrice, dTax) = mul_tax_layer.backward(dout: dPrice)
+        let (dApple, dAppleNum) = mul_apple_layer.backward(dout: dApplePrice)
+        doXCTAssert(dApple, 2.2)
+        doXCTAssert(dAppleNum, 110)
+        doXCTAssert(dTax, 200)
+    }
+    
+    func testNetwork2() {
+        let ((x_train, t_train), (x_test, t_test)) = load_mnist(flatten: true, normalize: false)
+        let network = Network2(inputSize: 784, hiddeSize: 50, outputSize: 10)
+
+        let x_batch = ValueArray<Double>(capacity: 784 * 3)
+        for i in 0..<784 * 3 {
+            x_batch.append(x_train.elements[i])
+        }
+
+        let t_batch = ValueArray<Double>(capacity: 3)
+        for i in 0..<3 {
+            t_batch.append(t_train.elements[i])
+        }
+
+        let tensorXBatch = Tensor<Double>(Matrix<Double>(rows:3, columns:784, elements:x_batch))
+        let tensorTBatch = Tensor<Double>(Matrix<Double>(rows:3, columns:1, elements:t_batch))
+
+        let gradNumerical = network.numerical_gradient(x: tensorXBatch, t: tensorTBatch)
+        let gradBackProp = network.gradient(x: tensorXBatch, t: tensorTBatch)
+
+        for key in gradNumerical.keys {
+            let a = gradBackProp[key] as! Tensor<Double>
+            let b = gradNumerical[key] as! Tensor<Double>
+
+            let mA = a.elements
+            let mB = b.elements
+            let tmp = mA - mB
+            let diff = Upsurge.mean(Upsurge.abs(tmp))
+            debugPrint("\(key): diff \(diff)")
+            doXCTAssert(diff, 0)
+        }
+    }
     
     func testNetwork3() {
         //let ((x_train, t_train), (x_test, t_test)) = load_mnist(flatten: true, normalize: false)
-        let network = Network2(inputSize: 5, hiddeSize: 10, outputSize: 5)
+        let network = Network2(inputSize: 2, hiddeSize: 10, outputSize: 1)
         
-        let tensorXBatch = Tensor<Double>(Matrix<Double>([[1, 2, 3, 4, 5],
-                                                      [6, 7, 8, 9, 10],
-                                                      [11, 12, 13, 14, 15]
+        let tensorXBatch = Tensor<Double>(Matrix<Double>([[1, 1],
+                                                      [0, 1],
+                                                      [1, 1]
                                                       ]))
         
-        let tensorTBatch = Tensor<Double>(Matrix<Double>([[1, 2, 3, 4, 5],
-                                                      [6, 7, 8, 9, 10],
-                                                      [11, 12, 13, 14, 15]
+        let tensorTBatch = Tensor<Double>(Matrix<Double>([[1],
+                                                      [0],
+                                                      [1]
             ]))
         
         let gradNumerical = network.numerical_gradient(x: tensorXBatch, t: tensorTBatch)
@@ -234,6 +252,12 @@ class testDeepLearningTests: XCTestCase {
             let tmp = mA - mB
             let diff = Upsurge.mean(Upsurge.abs(tmp))
             debugPrint("\(key) diff : \(diff)")
+            if key == "b2" {
+                doXCTAssert(diff, 0.1)
+            }
+            else {
+                doXCTAssert(diff, 0)
+            }
         }
         
     }
