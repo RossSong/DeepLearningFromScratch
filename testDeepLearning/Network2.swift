@@ -195,7 +195,7 @@ class SoftMaxWithLoss {
         guard let y = y,  let t = t else { return Tensor<Double>(dimensions: [1]) }
         let batch_size = Double(t.dimensions[0])
         let dx = (y.elements - t.elements) / batch_size
-        return Tensor<Double>(dx.toRowMatrix())
+        return Tensor<Double>(dx.toColumnMatrix())
     }
 }
 
@@ -277,8 +277,7 @@ class Network2 {
     func gradient(x: Tensor<Double>, t: Tensor<Double>) -> [String: Any] {
         _ = self.loss(x: x, t: t)
         
-        var dout = Tensor<Double>(Matrix<Double>(rows: t.dimensions[0],
-                                                 columns:countOfClass, elements: ValueArray<Double>(count:t.dimensions[0], repeatedValue: 1.0)))
+        var dout = self.lastLayer.backward(dout: 1)
         let layerAffine2 = self.layers["Affine2"] as! Affine
         dout = layerAffine2.backward(dout: dout)
         let layerRelu1 = self.layers["Relu1"] as! Relu
