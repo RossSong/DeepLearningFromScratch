@@ -15,5 +15,5 @@ func softmax(_ a:Tensor<Double>) -> Tensor<Double> {
     let sum_exp_a = sum(exp_a)
     let y = exp_a / sum_exp_a
     
-    return Tensor<Double>(y.toRowMatrix())
+    return Tensor<Double>(Matrix(rows: a.dimensions[0], columns: a.dimensions[1], elements: y))
 }
