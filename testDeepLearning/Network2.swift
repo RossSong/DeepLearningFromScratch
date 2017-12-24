@@ -157,7 +157,7 @@ class Affine {
         let tmp = transposeX * mDout
         self.dW = Tensor(tmp)
         
-        let tDb = Tensor<Double>(dimensions: [1, dout.dimensions[1]])
+        let tDb = Tensor<Double>(dimensions: [dout.dimensions[1], dout.dimensions[0]])
         
         for i in 0..<dout.dimensions[0] {
             var total: Double = 0
