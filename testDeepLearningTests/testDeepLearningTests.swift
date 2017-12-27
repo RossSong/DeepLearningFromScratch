@@ -194,41 +194,43 @@ class testDeepLearningTests: XCTestCase {
     }
     
     func testMiniBatch() {
-        let ((x_train, t_train), (x_test, t_test)) = load_mnist(flatten: true, normalize: false)
+        let ((x_train, t_train), (x_test, t_test)) = load_mnist(flatten: true, normalize: false, one_hot_label: true)
         let network = Network2(inputSize: 784, hiddeSize: 50, outputSize: 10)
         
         var trainLossList = Array<Double>()
         let itersNum = 10000
-        let batchSize = 1000
+        let batchSize = 100
         let learningRate: Double = 0.1
         for _ in 0..<itersNum {
-            let x_batch = ValueArray<Double>(capacity: 784 * batchSize)
-            
             var array = Array<Int>()
             for _ in 0..<batchSize {
                 array.append(Int(arc4random_uniform(UInt32(x_train.elements.count / 784))))
             }
             
+            let x_batch = ValueArray<Double>(capacity: 784 * batchSize)
             for i in 0..<batchSize {
                 for k in 0..<784 {
                     x_batch.append(x_train.elements[array[i] * 784 + k])
                 }
             }
             
-            let t_batch = ValueArray<Double>(capacity: batchSize)
+            let t_batch = ValueArray<Double>(capacity: 10 * batchSize)
             for i in 0..<batchSize {
-                t_batch.append(t_train.elements[array[i]])
+                for k in 0..<10 {
+                    t_batch.append(t_train.elements[array[i] * 10 + k])
+                }
             }
             
             let tensorXBatch = Tensor<Double>(Matrix<Double>(rows: batchSize, columns: 784, elements: x_batch))
-            let tensorTBatch = Tensor<Double>(Matrix<Double>(rows: batchSize, columns: 1, elements: t_batch))
+            let tensorTBatch = Tensor<Double>(Matrix<Double>(rows: batchSize, columns: 10, elements: t_batch))
             
             //let grad = network.numerical_gradient(x: tensorXBatch, t: tensorTBatch)
             let grad = network.gradient(x: tensorXBatch, t: tensorTBatch)
             
             for key in grad.keys {
-                let item = network.params[key] as! Tensor<Double>
-                network.params[key] = Tensor<Double>((item.elements - (learningRate * (grad[key] as! Tensor<Double>).elements)).toMatrix(rows: item.dimensions[0], columns: item.dimensions[1]))
+                if let item = network.params[key] {
+                    network.params[key] = Tensor<Double>((item.elements - (learningRate * (grad[key] as! Tensor<Double>).elements)).toMatrix(rows: item.dimensions[0], columns: item.dimensions[1]))
+                }
             }
             
             let loss = network.loss(x: tensorXBatch, t: tensorTBatch)

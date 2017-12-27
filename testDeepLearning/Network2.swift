@@ -26,7 +26,7 @@ func argmax(x: Tensor<Double>) -> Tensor<Double> {
         y.elements[i] = 0.0
     }
     
-    if y.elements.count >= index {
+    if y.elements.count <= index {
         debugPrint("argmax error!!! out of index")
     }
     
@@ -175,7 +175,16 @@ class Affine {
 
 func crossEntropyError(y: Tensor<Double>, t: Tensor<Double>) -> Double {
     let batch_size: Double = Double(y.dimensions[0])
-    return -1 * Upsurge.sum(t.elements * Upsurge.log(y.elements)) / batch_size
+    if y.elements.count != t.elements.count || 0 == batch_size {
+        debugPrint("Error - crossEntropyError")
+    }
+    
+    let val = Upsurge.sum(t.elements * Upsurge.log(y.elements))
+    if 0 == val {
+        return 0
+    }
+    
+    return -1 * val / batch_size
 }
 
 class SoftMaxWithLoss {

@@ -48,7 +48,7 @@ func checkFileExist(file: String) -> Bool {
     return false
 }
 
-func load_mnist(flatten: Bool, normalize: Bool) -> ((Tensor<Double>, Tensor<Double>), (Tensor<Double>, Tensor<Double>)) {
+func load_mnist(flatten: Bool, normalize: Bool, one_hot_label: Bool = false) -> ((Tensor<Double>, Tensor<Double>), (Tensor<Double>, Tensor<Double>)) {
     
     var images: [UInt8] = loadMNISTData(file: "MNIST-Images.data")
     var labels: [UInt8] = loadMNISTData(file: "MNIST-Labels.data")
@@ -84,18 +84,45 @@ func load_mnist(flatten: Bool, normalize: Bool) -> ((Tensor<Double>, Tensor<Doub
         }
     }
     
-    let tensorY = Tensor<Double>(dimensions: [train_rows])
-    let tensorTestY = Tensor<Double>(dimensions: [rows - train_rows])
+    var dimensionTrain = [train_rows]
+    var dimensionTest = [rows - train_rows]
     
-    for i in 0..<rows {
-        if i < train_rows {
-            tensorY[i] = Double(labels[i])
-        }
-        else {
-            tensorTestY[i - train_rows] = Double(labels[i])
-        }
+    if one_hot_label {
+        dimensionTrain = [train_rows, 10]
+        dimensionTest = [rows - train_rows, 10]
     }
     
+    let tensorY = Tensor<Double>(dimensions: dimensionTrain)
+    let tensorTestY = Tensor<Double>(dimensions: dimensionTest)
+    
+    if one_hot_label {
+        for i in 0..<rows {
+            for j in 0..<10 {
+                if i < train_rows {
+                    tensorY[i,j] = 0
+                    if j == labels[i] {
+                        tensorY[i,j] = 1
+                    }
+                }
+                else {
+                    tensorTestY[i - train_rows,j] = 0
+                    if j == labels[i] {
+                        tensorTestY[i - train_rows,j] = 1
+                    }
+                }
+            }
+        }
+    }
+    else {
+        for i in 0..<rows {
+            if i < train_rows {
+                tensorY[i] = Double(labels[i])
+            }
+            else {
+                tensorTestY[i - train_rows] = Double(labels[i])
+            }
+        }
+    }
     
     //return ((x_train, t_train), (x_test, t_test))
     return ((tensorX, tensorY), (tensorTestX, tensorTestY))
