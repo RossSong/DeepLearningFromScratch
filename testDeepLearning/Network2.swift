@@ -67,6 +67,17 @@ func numericalGradient(f: ((_ x: Tensor<Double>) -> Double), x: Tensor<Double>) 
     return Tensor<Double>(grad.toRowMatrix())
 }
 
+func gradientDescent(f: ((_ x: Tensor<Double>) -> Double), initX: Tensor<Double>, lr: Double = 0.01, stepNum: Int  = 100) -> Tensor<Double> {
+    let x = initX
+    
+    for _ in 0..<stepNum {
+        let grad = numericalGradient(f: f, x: x)
+        x.elements = x.elements - lr * grad.elements
+    }
+    
+    return x
+}
+
 class Relu {
     var dx: Tensor<Double>?
     
