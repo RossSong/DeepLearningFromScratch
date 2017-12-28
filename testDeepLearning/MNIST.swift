@@ -129,37 +129,46 @@ func getDimensionForLabels(one_hot_label: Bool, rows: Int, train_rows: Int) -> (
     return (dimensionTrain, dimensionTest)
 }
 
-func setupImageData(images: [UInt8], i: Int, tensorX: Tensor<Double>) {
+func getDelta(normalize: Bool) -> Double {
+    guard normalize else { return 1.0 }
+    return 255.0
+}
+
+func setupImageData(images: [UInt8], normalize: Bool, i: Int, tensorX: Tensor<Double>) {
+    let delta = getDelta(normalize: normalize)
+    
     for j in 0..<(28 * 28) {
-        tensorX[i,j] = Double(images[i * (28*28) + j])
+        tensorX[i,j] = Double(images[i * (28*28) + j]) / delta
     }
 }
 
-func setupImageDataForTest(images: [UInt8], train_rows: Int, i: Int, tensorTestX: Tensor<Double>) {
+func setupImageDataForTest(images: [UInt8], normalize: Bool, train_rows: Int, i: Int, tensorTestX: Tensor<Double>) {
+    let delta = getDelta(normalize: normalize)
+    
     for j in 0..<(28 * 28) {
-        tensorTestX[i - train_rows,j] = Double(images[i * (28*28) + j])
+        tensorTestX[i - train_rows,j] = Double(images[i * (28*28) + j]) / delta
     }
 }
 
-func setupX(images: [UInt8], rows: Int, train_rows: Int, tensorX: Tensor<Double>, tensorTestX: Tensor<Double>) {
+func setupX(images: [UInt8], normalize: Bool, rows: Int, train_rows: Int, tensorX: Tensor<Double>, tensorTestX: Tensor<Double>) {
     for i in 0..<rows {
         if i < train_rows {
-            setupImageData(images: images, i: i, tensorX: tensorX)
+            setupImageData(images: images, normalize: normalize, i: i, tensorX: tensorX)
         }
         else {
-            setupImageDataForTest(images: images, train_rows: train_rows, i: i, tensorTestX: tensorTestX)
+            setupImageDataForTest(images: images, normalize: normalize, train_rows: train_rows, i: i, tensorTestX: tensorTestX)
         }
     }
 }
 
-func getXAndTestX(images: [UInt8], rows: Int, train_rows: Int) -> (Tensor<Double>, Tensor<Double>) {
+func getXAndTestX(images: [UInt8], normalize: Bool, rows: Int, train_rows: Int) -> (Tensor<Double>, Tensor<Double>) {
     let tensorX = Tensor<Double>(dimensions: [train_rows, (28 * 28)])
     let tensorTestX = Tensor<Double>(dimensions: [rows - train_rows, (28 * 28)])
-    setupX(images: images, rows: rows, train_rows: train_rows, tensorX: tensorX, tensorTestX: tensorTestX)
+    setupX(images: images, normalize: normalize, rows: rows, train_rows: train_rows, tensorX: tensorX, tensorTestX: tensorTestX)
     return (tensorX, tensorTestX)
 }
 
-func getYAndTestY(labels: [UInt8], one_hot_label: Bool, rows: Int, train_rows: Int) -> (Tensor<Double>, Tensor<Double>) {
+func getYAndTestY(labels: [UInt8], normalize: Bool, one_hot_label: Bool, rows: Int, train_rows: Int) -> (Tensor<Double>, Tensor<Double>) {
     let (dimensionTrain, dimensionTest) = getDimensionForLabels(one_hot_label: one_hot_label, rows: rows, train_rows: train_rows)
     let tensorY = Tensor<Double>(dimensions: dimensionTrain)
     let tensorTestY = Tensor<Double>(dimensions: dimensionTest)
@@ -179,8 +188,8 @@ func load_mnist(flatten: Bool, normalize: Bool, one_hot_label: Bool = false) -> 
     
     let rows = images.count / (28 * 28)
     let train_rows = (rows)/100 * 80
-    let (tensorX, tensorTestX) = getXAndTestX(images: images, rows: rows, train_rows: train_rows)
-    let (tensorY, tensorTestY) = getYAndTestY(labels: labels, one_hot_label: one_hot_label, rows: rows, train_rows: train_rows)
+    let (tensorX, tensorTestX) = getXAndTestX(images: images, normalize: normalize, rows: rows, train_rows: train_rows)
+    let (tensorY, tensorTestY) = getYAndTestY(labels: labels, normalize: normalize, one_hot_label: one_hot_label, rows: rows, train_rows: train_rows)
     
     //return ((x_train, t_train), (x_test, t_test))
     return ((tensorX, tensorY), (tensorTestX, tensorTestY))
