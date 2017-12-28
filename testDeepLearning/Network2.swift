@@ -12,26 +12,22 @@ import Upsurge
 let None: Double = -1
 
 func argmax(x: Tensor<Double>) -> Tensor<Double> {
-    var max = 0.0
-    var index = 0
-    let y = x.copy()
+    let array = ValueArray<Double>(capacity: x.dimensions[0])
     
-    //가장 큰 것만 1 나머지는 0
-    for i in 0..<x.elements.count {
-        if x.elements[i] > max {
-            max = x.elements[i]
-            index = i
+    for i in 0..<x.dimensions[0] {
+        var max = 0.0
+        var index = 0
+        for j in 0..<x.dimensions[1] {
+            if x[i, j] > max {
+                max = x[i, j]
+                index = j
+            }
         }
         
-        y.elements[i] = 0.0
+        array.append(Double(index))
     }
     
-    if y.elements.count <= index {
-        debugPrint("argmax error!!! out of index")
-    }
-    
-    y.elements[index] = 1.0
-    return y
+    return Tensor<Double>(Matrix<Double>(rows: 1, columns: x.dimensions[0], elements: array))
 }
 
 func zeroLike(x: Tensor<Double>) -> ValueArray<Double> {
@@ -41,17 +37,18 @@ func zeroLike(x: Tensor<Double>) -> ValueArray<Double> {
 
 func boolEqualTensorSum(x: Tensor<Double>, y: Tensor<Double>) -> Double {
     var total: Double = 0
+    
     for i in 0..<x.elements.count {
-        if x[i] == y[i] {
+        if x.elements[i] == y.elements[i] {
             total = total + 1
         }
     }
     
-    return total
+    return total / Double(x.elements.count)
 }
 
 func numericalGradient(f: ((_ x: Tensor<Double>) -> Double), x: Tensor<Double>) -> Tensor<Double>{
-    let h: Double = 0.0001
+    let h: Double = 1e-4//0.0001
     let grad = zeroLike(x: x)
     
     for idx in 0..<x.elements.count {
@@ -267,8 +264,8 @@ class Network2 {
         }
 
 //        let accuracy = Upsurge.sum((y == t) / x.dimensions[0]
-        let accuracy = boolEqualTensorSum(x: newY, y: t) / Double(x.dimensions[0])
-        return accuracy
+        let acc = boolEqualTensorSum(x: newY, y: t) / Double(x.dimensions[0])
+        return acc
     }
 
     func numerical_gradient(x: Tensor<Double>, t: Tensor<Double>) -> [String: Any] {
