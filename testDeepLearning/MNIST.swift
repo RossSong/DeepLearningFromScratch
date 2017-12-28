@@ -48,42 +48,76 @@ func checkFileExist(file: String) -> Bool {
     return false
 }
 
-func load_mnist(flatten: Bool, normalize: Bool, one_hot_label: Bool = false) -> ((Tensor<Double>, Tensor<Double>), (Tensor<Double>, Tensor<Double>)) {
-    
-    var images: [UInt8] = loadMNISTData(file: "MNIST-Images.data")
-    var labels: [UInt8] = loadMNISTData(file: "MNIST-Labels.data")
-    
-    if 0 == images.count || 0 == images.count {
-        let dataMNIST = GetMNISTData()
-        
-        let pointerImages = UnsafeBufferPointer(start:dataMNIST.images, count:dataMNIST.images.count)
-        let dataImages = Data(buffer:pointerImages)
-        saveMNISTData(data: dataImages, file: "MNIST-Images.data")
-        
-        let pointerLabels = UnsafeBufferPointer(start:dataMNIST.labels, count:dataMNIST.labels.count)
-        let dataLabels = Data(buffer:pointerLabels)
-        saveMNISTData(data: dataLabels, file: "MNIST-Labels.data")
+func setupTrainLabelData(labels: Array<UInt8>, tensorY: Tensor<Double>, i: Int, j: Int) {
+    tensorY[i,j] = 0
+    if j == labels[i] {
+        tensorY[i,j] = 1
     }
-    
-    let rows = images.count / (28 * 28)
-    let train_rows = (rows)/100 * 80
-    
-    let tensorX = Tensor<Double>(dimensions: [train_rows, (28 * 28)])
-    let tensorTestX = Tensor<Double>(dimensions: [rows - train_rows, (28 * 28)])
-    
+}
+
+func setupTestLabelData(labels: Array<UInt8>, train_rows: Int, tensorTestY: Tensor<Double>, i: Int, j: Int) {
+    tensorTestY[i - train_rows,j] = 0
+    if j == labels[i] {
+        tensorTestY[i - train_rows,j] = 1
+    }
+}
+
+func doSetupOneHotLabels(labels: Array<UInt8>, train_rows: Int, tensorY: Tensor<Double>, tensorTestY: Tensor<Double>, i: Int, j: Int) {
+    if i < train_rows {
+        setupTrainLabelData(labels: labels, tensorY: tensorY, i: i, j: j)
+    }
+    else {
+        setupTestLabelData(labels: labels, train_rows: train_rows, tensorTestY: tensorTestY, i: i, j: j)
+    }
+}
+
+func setupOneHotLabels(labels: Array<UInt8>, rows: Int, train_rows: Int, tensorY: Tensor<Double>, tensorTestY: Tensor<Double>) {
+    for i in 0..<rows {
+        for j in 0..<10 {
+            doSetupOneHotLabels(labels: labels, train_rows: train_rows, tensorY: tensorY, tensorTestY: tensorTestY, i: i, j: j)
+        }
+    }
+}
+
+func setupNoOneHotLabels(labels: Array<UInt8>, rows: Int, train_rows: Int, tensorY: Tensor<Double>, tensorTestY: Tensor<Double>) {
     for i in 0..<rows {
         if i < train_rows {
-            for j in 0..<(28 * 28) {
-                tensorX[i,j] = Double(images[i * (28*28) + j])
-            }
+            tensorY[i] = Double(labels[i])
         }
         else {
-            for j in 0..<(28 * 28) {
-                tensorTestX[i - train_rows,j] = Double(images[i * (28*28) + j])
-            }
+            tensorTestY[i - train_rows] = Double(labels[i])
         }
     }
-    
+}
+
+func setupY(one_hot_label: Bool, labels: Array<UInt8>, rows: Int, train_rows: Int, tensorY: Tensor<Double>, tensorTestY: Tensor<Double>) {
+    if one_hot_label {
+        setupOneHotLabels(labels: labels, rows: rows, train_rows: train_rows, tensorY: tensorY, tensorTestY: tensorTestY)
+    }
+    else {
+        setupNoOneHotLabels(labels: labels, rows: rows, train_rows: train_rows, tensorY: tensorY, tensorTestY: tensorTestY)
+    }
+}
+
+func saveImageDataFile(_ dataMNIST: GetMNISTData) {
+    let pointerImages = UnsafeBufferPointer(start:dataMNIST.images, count:dataMNIST.images.count)
+    let dataImages = Data(buffer:pointerImages)
+    saveMNISTData(data: dataImages, file: "MNIST-Images.data")
+}
+
+func saveLabelDataFile(_ dataMNIST: GetMNISTData) {
+    let pointerLabels = UnsafeBufferPointer(start:dataMNIST.labels, count:dataMNIST.labels.count)
+    let dataLabels = Data(buffer:pointerLabels)
+    saveMNISTData(data: dataLabels, file: "MNIST-Labels.data")
+}
+
+func saveLoadAndPreparedDataFile() {
+    let dataMNIST = GetMNISTData()
+    saveImageDataFile(dataMNIST)
+    saveLabelDataFile(dataMNIST)
+}
+
+func getDimensionForLabels(one_hot_label: Bool, rows: Int, train_rows: Int) -> ([Int], [Int]) {
     var dimensionTrain = [train_rows]
     var dimensionTest = [rows - train_rows]
     
@@ -92,37 +126,61 @@ func load_mnist(flatten: Bool, normalize: Bool, one_hot_label: Bool = false) -> 
         dimensionTest = [rows - train_rows, 10]
     }
     
+    return (dimensionTrain, dimensionTest)
+}
+
+func setupImageData(images: [UInt8], i: Int, tensorX: Tensor<Double>) {
+    for j in 0..<(28 * 28) {
+        tensorX[i,j] = Double(images[i * (28*28) + j])
+    }
+}
+
+func setupImageDataForTest(images: [UInt8], train_rows: Int, i: Int, tensorTestX: Tensor<Double>) {
+    for j in 0..<(28 * 28) {
+        tensorTestX[i - train_rows,j] = Double(images[i * (28*28) + j])
+    }
+}
+
+func setupX(images: [UInt8], rows: Int, train_rows: Int, tensorX: Tensor<Double>, tensorTestX: Tensor<Double>) {
+    for i in 0..<rows {
+        if i < train_rows {
+            setupImageData(images: images, i: i, tensorX: tensorX)
+        }
+        else {
+            setupImageDataForTest(images: images, train_rows: train_rows, i: i, tensorTestX: tensorTestX)
+        }
+    }
+}
+
+func getXAndTestX(images: [UInt8], rows: Int, train_rows: Int) -> (Tensor<Double>, Tensor<Double>) {
+    let tensorX = Tensor<Double>(dimensions: [train_rows, (28 * 28)])
+    let tensorTestX = Tensor<Double>(dimensions: [rows - train_rows, (28 * 28)])
+    setupX(images: images, rows: rows, train_rows: train_rows, tensorX: tensorX, tensorTestX: tensorTestX)
+    return (tensorX, tensorTestX)
+}
+
+func getYAndTestY(labels: [UInt8], one_hot_label: Bool, rows: Int, train_rows: Int) -> (Tensor<Double>, Tensor<Double>) {
+    let (dimensionTrain, dimensionTest) = getDimensionForLabels(one_hot_label: one_hot_label, rows: rows, train_rows: train_rows)
     let tensorY = Tensor<Double>(dimensions: dimensionTrain)
     let tensorTestY = Tensor<Double>(dimensions: dimensionTest)
     
-    if one_hot_label {
-        for i in 0..<rows {
-            for j in 0..<10 {
-                if i < train_rows {
-                    tensorY[i,j] = 0
-                    if j == labels[i] {
-                        tensorY[i,j] = 1
-                    }
-                }
-                else {
-                    tensorTestY[i - train_rows,j] = 0
-                    if j == labels[i] {
-                        tensorTestY[i - train_rows,j] = 1
-                    }
-                }
-            }
-        }
+    setupY(one_hot_label: one_hot_label, labels: labels, rows: rows, train_rows: train_rows, tensorY: tensorY, tensorTestY: tensorTestY)
+    return (tensorY, tensorTestY)
+}
+
+func load_mnist(flatten: Bool, normalize: Bool, one_hot_label: Bool = false) -> ((Tensor<Double>, Tensor<Double>), (Tensor<Double>, Tensor<Double>)) {
+    
+    let images: [UInt8] = loadMNISTData(file: "MNIST-Images.data")
+    let labels: [UInt8] = loadMNISTData(file: "MNIST-Labels.data")
+    
+    if 0 == images.count || 0 == images.count {
+        saveLoadAndPreparedDataFile()
     }
-    else {
-        for i in 0..<rows {
-            if i < train_rows {
-                tensorY[i] = Double(labels[i])
-            }
-            else {
-                tensorTestY[i - train_rows] = Double(labels[i])
-            }
-        }
-    }
+    
+    let rows = images.count / (28 * 28)
+    let train_rows = (rows)/100 * 80
+    let (tensorX, tensorTestX) = getXAndTestX(images: images, rows: rows, train_rows: train_rows)
+    let (tensorY, tensorTestY) = getYAndTestY(labels: labels, one_hot_label: one_hot_label, rows: rows, train_rows: train_rows)
     
     //return ((x_train, t_train), (x_test, t_test))
     return ((tensorX, tensorY), (tensorTestX, tensorTestY))
