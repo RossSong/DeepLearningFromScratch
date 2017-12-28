@@ -204,7 +204,7 @@ class SoftMaxWithLoss {
 
     func backward(dout: Double = 1) -> Tensor<Double> {
         guard let y = y,  let t = t else { return Tensor<Double>(dimensions: [1]) }
-        let batch_size = Double(t.dimensions[0])
+        let batch_size = Double(t.elements.count)
         let dx = (y.elements - t.elements) / batch_size
         return Tensor<Double>(Matrix(rows: y.dimensions[0], columns: y.dimensions[1], elements:dx))
     }
