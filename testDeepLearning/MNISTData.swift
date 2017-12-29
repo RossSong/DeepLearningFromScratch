@@ -19,15 +19,22 @@ class GetMNISTData {
     
     
     init() {
+        let tranLabelName = "train-labels-idx1-ubyte"
+        let tranImageName = "train-images-idx3-ubyte"
+        
         // get the url to this layer's weights and bias
-        let wtPath = Bundle.main.path(forResource: "t10k-images-idx3-ubyte", ofType: "data")
-        let bsPath = Bundle.main.path(forResource: "t10k-labels-idx1-ubyte", ofType: "data")
+//        let bsPath = Bundle.main.path(forResource: "t10k-labels-idx1-ubyte", ofType: "data")
+//        let wtPath = Bundle.main.path(forResource: "t10k-images-idx3-ubyte", ofType: "data")
+        let bsPath = Bundle.main.path(forResource: tranLabelName, ofType: "data")
+        let wtPath = Bundle.main.path(forResource: tranImageName, ofType: "data")
         
         // find and open file
-        let URLL = Bundle.main.url(forResource: "t10k-labels-idx1-ubyte", withExtension: "data")
+        //let URLL = Bundle.main.url(forResource: "t10k-labels-idx1-ubyte", withExtension: "data")
+        let URLL = Bundle.main.url(forResource: tranLabelName, withExtension: "data")
         let dataL = NSData(contentsOf: URLL!)
         
-        let URLI = Bundle.main.url(forResource: "t10k-images-idx3-ubyte", withExtension: "data")
+        //let URLI = Bundle.main.url(forResource: "t10k-images-idx3-ubyte", withExtension: "data")
+        let URLI = Bundle.main.url(forResource: tranImageName, withExtension: "data")
         let dataI = NSData(contentsOf: URLI!)
         
         // calculate the size of weights and bias required to be memory mapped into memory

@@ -179,11 +179,13 @@ func getYAndTestY(labels: [UInt8], normalize: Bool, one_hot_label: Bool, rows: I
 
 func load_mnist(flatten: Bool, normalize: Bool, one_hot_label: Bool = false) -> ((Tensor<Double>, Tensor<Double>), (Tensor<Double>, Tensor<Double>)) {
     
-    let images: [UInt8] = loadMNISTData(file: "MNIST-Images.data")
-    let labels: [UInt8] = loadMNISTData(file: "MNIST-Labels.data")
+    var images: [UInt8] = loadMNISTData(file: "MNIST-Images.data")
+    var labels: [UInt8] = loadMNISTData(file: "MNIST-Labels.data")
     
     if 0 == images.count || 0 == images.count {
         saveLoadAndPreparedDataFile()
+        images = loadMNISTData(file: "MNIST-Images.data")
+        labels = loadMNISTData(file: "MNIST-Labels.data")
     }
     
     let rows = images.count / (28 * 28)
