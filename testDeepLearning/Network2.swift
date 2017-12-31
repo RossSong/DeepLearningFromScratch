@@ -115,6 +115,18 @@ func toMatrix(_ x: Tensor<Double>) -> Matrix<Double> {
     return Matrix<Double>(rows: x.dimensions[0], columns: x.dimensions[1], elements: x.elements)
 }
 
+func transpose(_ x: Tensor<Double>) -> Tensor<Double> {
+    
+    let m = Tensor<Double>(Matrix(rows: x.dimensions[1], columns: x.dimensions[0]))
+    for i in 0..<x.dimensions[0] {
+        for j in 0..<x.dimensions[1] {
+            m[j, i] = x[i, j]
+        }
+    }
+    
+    return m
+}
+
 class Affine {
     var W: Tensor<Double>
     var b: Tensor<Double>
@@ -134,28 +146,16 @@ class Affine {
         let tW = Matrix<Double>(rows:W.dimensions[0], columns:W.dimensions[1], elements: W.elements)
         let tb = b.elements
         
-        let out = tx * tW
+        let out = Tensor<Double>(tx * tW)
         
         //(tx * tw) + tb -> out + tb
         for i in 0..<out.dimensions[0] {
             for j in 0..<out.dimensions[1] {
-                out.elements[i * out.dimensions[1] + j] = out.elements[i * out.dimensions[1] + j] + tb[j]
+                out[i, j] = out[i, j] + tb[j]
             }
         }
         
-        return Tensor<Double>(out)
-    }
-    
-    func transpose(_ x: Tensor<Double>) -> Tensor<Double> {
-        
-        let m = Tensor<Double>(Matrix(rows: x.dimensions[1], columns: x.dimensions[0]))
-        for i in 0..<x.dimensions[0] {
-            for j in 0..<x.dimensions[1] {
-                m[j, i] = x[i, j]
-            }
-        }
-        
-        return m
+        return out
     }
     
     func backward(dout: Tensor<Double>) -> Tensor<Double> {

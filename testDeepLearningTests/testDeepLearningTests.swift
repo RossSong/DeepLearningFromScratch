@@ -268,17 +268,62 @@ class testDeepLearningTests: XCTestCase {
         return (x_test_batch, t_test_batch)
     }
     
+    func save(_ network: Network2) {
+         do {
+         let documentsDirectory =  try FileManager().url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+         let pathW1 = documentsDirectory.appendingPathComponent("gradsW1.data")
+         let pathB1 = documentsDirectory.appendingPathComponent("gradsB1.data")
+         let pathW2 = documentsDirectory.appendingPathComponent("gradsW2.data")
+         let pathB2 = documentsDirectory.appendingPathComponent("gradsB2.data")
+         
+         //            var listOfTasksW1: Dictionary<String, Tensor<Double>> {
+         //                get {
+         //                    return (NSKeyedUnarchiver.unarchiveObject(withFile: listOfTasksURL.path) as? Dictionary<String, Tensor<Double>>)!
+         //                }
+         //                set {
+         //                    NSKeyedArchiver.archiveRootObject(newValue, toFile: listOfTasksURL.path)
+         //                }
+         //            }
+         
+         if let item = network.params["W1"] {
+         let array = Array<Double>(item.elements)
+         NSKeyedArchiver.archiveRootObject(array, toFile: pathW1.path)
+         item.elements = ValueArray<Double>(capacity: item.elements.count)
+         item.elements.append(contentsOf: array)
+         }
+         
+         if let item = network.params["B1"] {
+         let array = Array<Double>(item.elements)
+         NSKeyedArchiver.archiveRootObject(array, toFile: pathB1.path)
+         }
+         
+         if let item = network.params["W2"] {
+         let array = Array<Double>(item.elements)
+         NSKeyedArchiver.archiveRootObject(array, toFile: pathW2.path)
+         }
+         
+         if let item = network.params["B2"] {
+         let array = Array<Double>(item.elements)
+         NSKeyedArchiver.archiveRootObject(array, toFile: pathB2.path)
+         }
+         }
+         catch {
+         debugPrint("failed to save!!")
+         }
+    }
+    
+    /*
     func testGradient() {
         debugPrint("start..")
         let ((x_train, t_train), (x_test, t_test)) = load_mnist(flatten: true, normalize: true, one_hot_label: true)
-        let network = Network2(inputSize: 784, hiddeSize: 50, outputSize: 10)
+        let network = Network2(inputSize: 784, hiddeSize: 10, outputSize: 10)
         
         var trainLossList = Array<Double>()
-        let itersNum = 10000
-        let batchSize = 100
+        let itersNum = 1000
+        let batchSize = 10
         let trainSize = x_train.dimensions[0]
         let learningRate: Double = 0.1
-        let iterPerEpoch = max(trainSize / batchSize, 1)
+        let iterPerEpoch = 10//max(trainSize / batchSize, 1)
         
         for i in 0..<itersNum {
             
@@ -290,12 +335,13 @@ class testDeepLearningTests: XCTestCase {
             let tensorXTestBatch = Tensor<Double>(Matrix<Double>(rows: batchSize, columns: 784, elements: x_test_batch))
             let tensorTTestBatch = Tensor<Double>(Matrix<Double>(rows: batchSize, columns: 10, elements: t_test_batch))
             
-            //let grad = network.numerical_gradient(x: tensorXBatch, t: tensorTBatch)
-            let grad = network.gradient(x: tensorXBatch, t: tensorTBatch)
+            let grad = network.numerical_gradient(x: tensorXBatch, t: tensorTBatch)
+            //let grad = network.gradient(x: tensorXBatch, t: tensorTBatch)
             
             for key in grad.keys {
                 if let item = network.params[key], let itemGrad = (grad[key] as? Tensor<Double>) {
                     //network.params[key] = Tensor<Double>((item.elements - (learningRate * (grad[key] as! Tensor<Double>).elements)).toMatrix(rows: item.dimensions[0], columns: item.dimensions[1]))
+                    //debugPrint(itemGrad.elements)
                     item.elements = item.elements - learningRate * itemGrad.elements
                 }
             }
@@ -309,54 +355,14 @@ class testDeepLearningTests: XCTestCase {
                 let testAcc = network.accuracy(x: tensorXTestBatch, t: tensorTTestBatch)
                 //                trainAccList.append(trainAcc)
                 //                testAccList.append(testAcc)
-                debugPrint("\(trainAcc), \(testAcc)")
+                debugPrint("accuracy - \(trainAcc), \(testAcc)")
             }
         }
         
-        do {
-            let documentsDirectory =  try FileManager().url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
-            let pathW1 = documentsDirectory.appendingPathComponent("gradsW1.data")
-            let pathB1 = documentsDirectory.appendingPathComponent("gradsB1.data")
-            let pathW2 = documentsDirectory.appendingPathComponent("gradsW2.data")
-            let pathB2 = documentsDirectory.appendingPathComponent("gradsB2.data")
-            
-//            var listOfTasksW1: Dictionary<String, Tensor<Double>> {
-//                get {
-//                    return (NSKeyedUnarchiver.unarchiveObject(withFile: listOfTasksURL.path) as? Dictionary<String, Tensor<Double>>)!
-//                }
-//                set {
-//                    NSKeyedArchiver.archiveRootObject(newValue, toFile: listOfTasksURL.path)
-//                }
-//            }
-            
-            if let item = network.params["W1"] {
-                let array = Array<Double>(item.elements)
-                NSKeyedArchiver.archiveRootObject(array, toFile: pathW1.path)
-                item.elements = ValueArray<Double>(capacity: item.elements.count)
-                item.elements.append(contentsOf: array)
-            }
-            
-            if let item = network.params["B1"] {
-                let array = Array<Double>(item.elements)
-                NSKeyedArchiver.archiveRootObject(array, toFile: pathB1.path)
-            }
-            
-            if let item = network.params["W2"] {
-                let array = Array<Double>(item.elements)
-                NSKeyedArchiver.archiveRootObject(array, toFile: pathW2.path)
-            }
-            
-            if let item = network.params["B2"] {
-                let array = Array<Double>(item.elements)
-                NSKeyedArchiver.archiveRootObject(array, toFile: pathB2.path)
-            }
-        }
-        catch {
-            debugPrint("failed to save!!")
-        }
-        
+        //save(network)
         debugPrint("end.")
     }
+    */
     
     /*
     func testMiniBatch() {
@@ -366,7 +372,7 @@ class testDeepLearningTests: XCTestCase {
         var trainLossList = Array<Double>()
         let itersNum = 10000
         let batchSize = 1
-        let learningRate: Double = 0.01
+        let learningRate: Double = 1
         for _ in 0..<itersNum {
             var array = Array<Int>()
             for _ in 0..<batchSize {
@@ -390,12 +396,12 @@ class testDeepLearningTests: XCTestCase {
             let tensorXBatch = Tensor<Double>(Matrix<Double>(rows: batchSize, columns: 784, elements: x_batch))
             let tensorTBatch = Tensor<Double>(Matrix<Double>(rows: batchSize, columns: 10, elements: t_batch))
             
-            //let grad = network.numerical_gradient(x: tensorXBatch, t: tensorTBatch)
-            let grad = network.gradient(x: tensorXBatch, t: tensorTBatch)
+            let grad = network.numerical_gradient(x: tensorXBatch, t: tensorTBatch)
+            //let grad = network.gradient(x: tensorXBatch, t: tensorTBatch)
             
             for key in grad.keys {
-                if let item = network.params[key] {
-                    network.params[key] = Tensor<Double>((item.elements - (learningRate * (grad[key] as! Tensor<Double>).elements)).toMatrix(rows: item.dimensions[0], columns: item.dimensions[1]))
+                if let item = network.params[key], let itemGrad = (grad[key] as? Tensor<Double>) {
+                    item.elements = item.elements - learningRate * itemGrad.elements
                 }
             }
             
@@ -405,7 +411,7 @@ class testDeepLearningTests: XCTestCase {
         }
     }
     */
-    
+ 
     /*
     func testNetwork2() {
         let count = 3
@@ -440,7 +446,8 @@ class testDeepLearningTests: XCTestCase {
             if doXCTAssert(diff, 0) { XCTFail() }
         }
     }
-    
+    */
+    /*
     func testNetwork3() {
         //let ((x_train, t_train), (x_test, t_test)) = load_mnist(flatten: true, normalize: false)
         let network = Network2(inputSize: 2, hiddeSize: 10, outputSize: 1)
@@ -476,5 +483,139 @@ class testDeepLearningTests: XCTestCase {
         }
         
     }*/
-
+    
+    func testAffine() {
+        let tensorW1 = Tensor<Double>(Matrix<Double>([[2], [1]]))
+        let tensorB1 = Tensor<Double>(Matrix<Double>([[0, 0, 0]]))
+        let tensorX = Tensor<Double>(Matrix<Double>([[1, 2]]))
+        
+        let network = Affine(W: tensorW1, b: tensorB1)
+        let tensorY = network.forward(x: tensorX)
+        let dout = Tensor<Double>(Matrix<Double>([[0.1]]))
+        let ret = network.backward(dout: dout)
+        
+        debugPrint(ret.elements)
+    }
+    
+    func testRandom() {
+        let randW1 = MyRandomGenerator.randn(inputSize: 2, outputSize: 4)
+        debugPrint(randW1.elements)
+    }
+    
+    
+    func testSimpleNet() {
+        let net = simpleNet()
+        debugPrint(net.W.elements)
+        
+        let x = Tensor<Double>(Matrix<Double>([[0.6, 0.9]]))
+        var p = net.predict(x: x)
+        debugPrint(p.elements)
+        
+        var index = argmax(x: p)
+        debugPrint(index.elements)
+        
+        let t = Tensor<Double>(Matrix<Double>([[1, 0, 0]]))
+        var ret = net.loss(x: x, t: t)
+        debugPrint(ret)
+    
+        func f(W: Tensor<Double>) -> Double {
+            return net.loss(x: x, t: t)
+        }
+        
+        debugPrint("loss: \(ret)")
+        net.W = gradientDescent(f:f, initX: net.W, lr: 0.1, stepNum: 100 )
+        ret = net.loss(x: x, t: t)
+        debugPrint("loss: \(ret)")
+        
+//        for _ in 0..<100 {
+//            let dW = numericalGradient(f: f, x: )
+//            print(dW.elements)
+//            net.W.elements = net.W.elements - 0.1 * dW.elements
+//            p = net.predict(x: x)
+//            debugPrint(p.elements)
+//            index = argmax(x: p)
+//            debugPrint(index.elements)
+//            ret = net.loss(x: x, t: t)
+//            debugPrint("loss: \(ret)")
+//        }
+    }
+    
+    /*
+    func testTwoLayerNet() {
+        let net = TwoLayerNet(inputSize: 784, hiddenSize: 100, outputSize: 10)
+        debugPrint(net.params["W1"]?.dimensions) // (784, 100)
+        debugPrint(net.params["b1"]?.dimensions) // (100,)
+        debugPrint(net.params["W2"]?.dimensions) // (100, 10)
+        debugPrint(net.params["b2"]?.dimensions) // (10,)
+        
+        let x = MyRandomGenerator.randn(inputSize: 100, outputSize: 784)
+        let y = net.predict(x: x)
+        let t = MyRandomGenerator.randn(inputSize: 100, outputSize: 10)
+        
+        let grads = net.numericalGradientA(x: x, t: t)
+        
+        debugPrint((grads["W1"] as! Tensor<Double>).dimensions) // (784, 100)
+        debugPrint((grads["b1"] as! Tensor<Double>).dimensions) // (100,)
+        debugPrint((grads["W2"] as! Tensor<Double>).dimensions) // (100, 10)
+        debugPrint((grads["b2"] as! Tensor<Double>).dimensions) // (10,)
+    }
+    */
+    
+    func testTwoLayerNetForMNIST() {
+        let ((x_train, t_train), (x_test, t_test)) = load_mnist(flatten: true, normalize: true, one_hot_label: true)
+        let network = TwoLayerNet(inputSize: 784, hiddenSize: 50, outputSize: 10)
+        
+        // 하이퍼파라미터
+        let itersNum = 10000  // 반복 횟수를 적절히 설정한다.
+//        let trainSize = x_train.dimensions[0]
+        let batchSize = 100   // 미니배치 크기
+        let learningRate: Double = 0.1
+        
+//        train_loss_list = []
+//        train_acc_list = []
+//        test_acc_list = []
+        
+        // 1에폭당 반복 수
+        let iterPerEpoch = 100//max(trainSize / batchSize, 1)
+        
+        for i in 0..<itersNum {
+            // 미니배치 획득
+            let (x_batch, t_batch) = getTrainBatch(x_train, t_train, batchSize)
+            let (x_test_batch, t_test_batch) = getTestBatch(x_test, t_test, batchSize)
+            ///
+            let tensorXBatch = Tensor<Double>(Matrix<Double>(rows: batchSize, columns: 784, elements: x_batch))
+            let tensorTBatch = Tensor<Double>(Matrix<Double>(rows: batchSize, columns: 10, elements: t_batch))
+            let tensorXTestBatch = Tensor<Double>(Matrix<Double>(rows: batchSize, columns: 784, elements: x_test_batch))
+            let tensorTTestBatch = Tensor<Double>(Matrix<Double>(rows: batchSize, columns: 10, elements: t_test_batch))
+            
+            // 기울기 계산
+            //grad = network.numerical_gradient(x_batch, t_batch)
+            let grad = network.gradient(x: tensorXBatch, t: tensorTBatch)
+        
+            // 매개변수 갱신
+            for key in ["W1", "b1", "W2", "b2"] {
+                if let item = network.params[key], let itemGrad = (grad[key] as? Tensor<Double>) {
+                    item.elements = item.elements - learningRate * itemGrad.elements
+                }
+            }
+//            for key in ["W1", "b1", "W2", "b2"] {
+//                if let item = network.params[key], let itemGrad = (grad[key] as? Tensor<Double>) {
+//                    item.elements = item.elements - learningRate * itemGrad.elements
+//                }
+//            }
+        
+            // 학습 경과 기록
+            let loss = network.loss(x: tensorXBatch, t: tensorTBatch)
+            //train_loss_list.append(loss)s
+            debugPrint("loss: \(loss)")
+        
+            if 0 == i % iterPerEpoch {
+                let trainAcc = network.accuracy(x: tensorXBatch, t: tensorTBatch)
+                let testAcc = network.accuracy(x: tensorXTestBatch, t: tensorTTestBatch)
+                //                trainAccList.append(trainAcc)
+                //                testAccList.append(testAcc)
+                debugPrint("accuracy - \(trainAcc), \(testAcc)")
+            }
+        }
+    }
 }

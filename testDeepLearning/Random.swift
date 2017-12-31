@@ -38,12 +38,16 @@ class MyRandomGenerator {
     }
     
     class func randn(inputSize: Int, outputSize: Int) -> Tensor<Double> {
-        let generator = MyRandomGenerator()
-        
+//        let generator = MyRandomGenerator()
+//
+//        generator.s = mean
+//        generator.v2 = std
+        let n = Distributions.Normal(m: 0, v: 1)
         let tensor = Tensor<Double>(dimensions: [inputSize, outputSize])
         for i in 0..<inputSize {
             for j in 0..<outputSize {
-                tensor[i,j] = generator.gaussRand
+//                tensor[i,j] = generator.gaussRand
+                tensor[i, j] = n.Random()
             }
         }
         
