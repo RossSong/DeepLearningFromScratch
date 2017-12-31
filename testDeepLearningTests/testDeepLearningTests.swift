@@ -618,4 +618,18 @@ class testDeepLearningTests: XCTestCase {
             }
         }
     }
+    
+    func testSigmoid() {
+        let x = Tensor<Double>(Matrix<Double>([[0.1, 0.2]]))
+        let ret = sigmoid(x)
+        XCTAssert(0.52497918747894 == ret[0,0])
+        XCTAssert(0.549833997312478 == ret[0,1])
+    }
+    
+    func testSigmoidGrad() {
+        let x = Tensor<Double>(Matrix<Double>([[0.1, 0.2]]))
+        let ret = sigmoid_grad(x: x)
+        XCTAssert(((1 - 0.52497918747894) * 0.52497918747894) == ret[0,0])
+        XCTAssert(((1 - 0.549833997312478) * 0.549833997312478) == ret[0,1])
+    }
 }
