@@ -65,11 +65,15 @@ class TwoLayerNet {
     }
 
     func accuracy(x: Tensor<Double>, t: Tensor<Double>) -> Double {
-        let t = argmax(x: t)
-        var y = self.predict(x: x)
-        y = argmax(x: y)
+        let y = self.predict(x: x)
+        var t = t
+        let newY = argmax(x: y)
         
-        let acc = boolEqualTensorSum(x: y, y: t) / Double(x.dimensions[0])
+        if 1 != t.rank {
+            t = argmax(x: t)
+        }
+        
+        let acc = boolEqualTensorSum(x: newY, y: t)
         return acc
     }
 
