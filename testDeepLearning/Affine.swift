@@ -27,10 +27,10 @@ class Affine {
         return out
     }
     
-    func backward(dout: ValueArray<Double>) -> Tensor<Double> {
+    func backward(dout: Tensor<Double>) -> Tensor<Double> {
         let dx = dout * self.W.T
         self.dW = self.x!.T * dout
-        self.db = sumA(dout)
+        self.db = sumA(dout.elements)
         return dx
     }
 }

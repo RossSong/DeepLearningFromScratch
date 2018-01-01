@@ -102,11 +102,11 @@ class Network2 {
         
         var dout = self.lastLayer.backward(dout: 1)
         let layerAffine2 = self.layers["Affine2"] as! Affine
-        dout = layerAffine2.backward(dout: dout.elements)
+        dout = layerAffine2.backward(dout: dout)
         let layerRelu1 = self.layers["Relu1"] as! Relu
         dout = layerRelu1.backward(dout: dout)
         let layerAffine1 = self.layers["Affine1"] as! Affine
-        dout = layerAffine1.backward(dout: dout.elements)
+        dout = layerAffine1.backward(dout: dout)
         
         var grads = [String: Any]()
         grads["W1"] = (self.layers["Affine1"] as! Affine).dW
