@@ -323,90 +323,38 @@ class testDeepLearningTests: XCTestCase {
          }
     }
     
-    /*
     func testGradient() {
         debugPrint("start..")
         let ((x_train, t_train), (x_test, t_test)) = load_mnist(flatten: true, normalize: true, one_hot_label: true)
-        let network = Network2(inputSize: 784, hiddeSize: 10, outputSize: 10)
+                let inputSize = 784
+                let outputSize = 10
+                let hiddenSize = 2
+//        let x_train = Tensor<Double>(Matrix<Double>([[1,2],[3,4]]))
+//        let t_train = Tensor<Double>(Matrix<Double>([[1,0],[0,1]]))
+//
+//        let inputSize = 2
+//        let outputSize = 2
+//        let hiddenSize = 3
+
+        let network = Network2(inputSize: inputSize, hiddeSize: hiddenSize, outputSize: outputSize)
         
         var trainLossList = Array<Double>()
-        let itersNum = 1000
-        let batchSize = 10
-        let trainSize = x_train.dimensions[0]
-        let learningRate: Double = 0.1
+        let itersNum = 10000
+        let batchSize = 1000
+        //let trainSize = x_train.dimensions[0]
+        let learningRate: Double = 0.01
         let iterPerEpoch = 10//max(trainSize / batchSize, 1)
         
         for i in 0..<itersNum {
             
-            let (x_batch, t_batch) = getTrainBatch(x_train, t_train, batchSize)
-            let (x_test_batch, t_test_batch) = getTestBatch(x_test, t_test, batchSize)
+            let (x_batch, t_batch) = getTrainBatch(x_train, t_train, batchSize, inputSize: inputSize, outputSize: outputSize)
+//            let (x_test_batch, t_test_batch) = getTestBatch(x_test, t_test, batchSize, inputSize: inputSize, outputSize: outputSize)
             ///
-            let tensorXBatch = Tensor<Double>(Matrix<Double>(rows: batchSize, columns: 784, elements: x_batch))
-            let tensorTBatch = Tensor<Double>(Matrix<Double>(rows: batchSize, columns: 10, elements: t_batch))
-            let tensorXTestBatch = Tensor<Double>(Matrix<Double>(rows: batchSize, columns: 784, elements: x_test_batch))
-            let tensorTTestBatch = Tensor<Double>(Matrix<Double>(rows: batchSize, columns: 10, elements: t_test_batch))
-            
-            let grad = network.numerical_gradient(x: tensorXBatch, t: tensorTBatch)
-            //let grad = network.gradient(x: tensorXBatch, t: tensorTBatch)
-            
-            for key in grad.keys {
-                if let item = network.params[key], let itemGrad = (grad[key] as? Tensor<Double>) {
-                    //network.params[key] = Tensor<Double>((item.elements - (learningRate * (grad[key] as! Tensor<Double>).elements)).toMatrix(rows: item.dimensions[0], columns: item.dimensions[1]))
-                    //debugPrint(itemGrad.elements)
-                    item.elements = item.elements - learningRate * itemGrad.elements
-                }
-            }
-            
-            let loss = network.loss(x: tensorXBatch, t: tensorTBatch)
-            trainLossList.append(loss)
-            debugPrint("loss: \(loss)")
-            
-            if 0 == i % iterPerEpoch {
-                let trainAcc = network.accuracy(x: tensorXBatch, t: tensorTBatch)
-                let testAcc = network.accuracy(x: tensorXTestBatch, t: tensorTTestBatch)
-                //                trainAccList.append(trainAcc)
-                //                testAccList.append(testAcc)
-                debugPrint("accuracy - \(trainAcc), \(testAcc)")
-            }
-        }
-        
-        //save(network)
-        debugPrint("end.")
-    }
-    */
-    
-    /*
-    func testMiniBatch() {
-        let ((x_train, t_train), (x_test, t_test)) = load_mnist(flatten: true, normalize: true, one_hot_label: true)
-        let network = Network2(inputSize: 784, hiddeSize: 50, outputSize: 10)
-        
-        var trainLossList = Array<Double>()
-        let itersNum = 10000
-        let batchSize = 10
-        let learningRate: Double = 0.1
-        for _ in 0..<itersNum {
-            var array = Array<Int>()
-            for _ in 0..<batchSize {
-                array.append(Int(arc4random_uniform(UInt32(x_train.elements.count / 784))))
-            }
-            
-            let x_batch = ValueArray<Double>(capacity: 784 * batchSize)
-            for i in 0..<batchSize {
-                for k in 0..<784 {
-                    x_batch.append(x_train.elements[array[i] * 784 + k])
-                }
-            }
-            
-            let t_batch = ValueArray<Double>(capacity: 10 * batchSize)
-            for i in 0..<batchSize {
-                for k in 0..<10 {
-                    t_batch.append(t_train.elements[array[i] * 10 + k])
-                }
-            }
-            
-            let tensorXBatch = Tensor<Double>(Matrix<Double>(rows: batchSize, columns: 784, elements: x_batch))
-            let tensorTBatch = Tensor<Double>(Matrix<Double>(rows: batchSize, columns: 10, elements: t_batch))
-            
+            let tensorXBatch = Tensor<Double>(Matrix<Double>(rows: batchSize, columns: inputSize, elements: x_batch))
+            let tensorTBatch = Tensor<Double>(Matrix<Double>(rows: batchSize, columns: outputSize, elements: t_batch))
+//            let tensorXTestBatch = Tensor<Double>(Matrix<Double>(rows: batchSize, columns: inputSize, elements: x_test_batch))
+//            let tensorTTestBatch = Tensor<Double>(Matrix<Double>(rows: batchSize, columns: outputSize, elements: t_test_batch))
+//
             //let grad = network.numerical_gradient(x: tensorXBatch, t: tensorTBatch)
             let grad = network.gradient(x: tensorXBatch, t: tensorTBatch)
             
@@ -419,10 +367,21 @@ class testDeepLearningTests: XCTestCase {
             let loss = network.loss(x: tensorXBatch, t: tensorTBatch)
             trainLossList.append(loss)
             debugPrint("loss: \(loss)")
+            
+            if 0 == i % iterPerEpoch {
+                let trainAcc = network.accuracy(x: tensorXBatch, t: tensorTBatch)
+//                let testAcc = network.accuracy(x: tensorXTestBatch, t: tensorTTestBatch)
+                //                trainAccList.append(trainAcc)
+                //                testAccList.append(testAcc)
+//                debugPrint("accuracy - \(trainAcc), \(testAcc)")
+                debugPrint("accuracy - \(trainAcc)")
+            }
         }
+        
+        //save(network)
+        debugPrint("end.")
     }
-    */
- 
+    
     /*
     func testNetwork2() {
         let count = 3
@@ -560,6 +519,7 @@ class testDeepLearningTests: XCTestCase {
     }
     */
     
+    /*
     func testTwoLayerNetForMNIST() {
         let ((x_train, t_train), (x_test, t_test)) = load_mnist(flatten: true, normalize: true, one_hot_label: true)
 //        let x_train = Tensor<Double>(Matrix<Double>([[1,2],[3,4]]))
@@ -621,6 +581,7 @@ class testDeepLearningTests: XCTestCase {
             }
         }
     }
+ */
     
     func testSigmoid() {
         let x = Tensor<Double>(Matrix<Double>([[0.1, 0.2]]))
@@ -648,9 +609,11 @@ class testDeepLearningTests: XCTestCase {
         XCTAssert(ret[1,0] == 15)
         XCTAssert(ret[1,1] == 22)
         
-        let dout = Tensor<Double>(Matrix<Double>([[0.5, 0.6]]))
-        ret = aff.backward(dout: dout.elements)
+        let dout = Tensor<Double>(Matrix<Double>([[0.5, 0.6], [0.5, 0.6]]))
+        ret = aff.backward(dout: dout)
         XCTAssert(ret[0,0] == 1.7)
         XCTAssert(ret[0,1] == 3.9)
+        XCTAssert(ret[1,0] == 1.7)
+        XCTAssert(ret[1,1] == 3.9)
     }
 }
