@@ -81,17 +81,28 @@ class testDeepLearningTests: XCTestCase {
     
     func testSoftMax() {
         let a = ValueArray<Double>([0.3, 2.9, 4.0])
-        let y = softmax(Tensor<Double>(a.toRowMatrix()))
-        XCTAssert(y[0] == 0.018211273295547531)
-        XCTAssert(y[1] == 0.24519181293507392)
-        XCTAssert(y[2] == 0.73659691376937864)
+        let y = softmax(Tensor<Double>(dimensions: [1,3], elements: a))
+        XCTAssert(y[0,0] == 0.018211273295547531)
+        XCTAssert(y[0,1] == 0.24519181293507392)
+        XCTAssert(y[0,2] == 0.73659691376937864)
     }
     
     func testSoftMax2() {
+        let a = Tensor<Double>(Matrix<Double>([[0.3, 2.9, 4.0],[0.3, 2.9, 4.0]]))
+        let y = softmax(a)
+        XCTAssert(y[0,0] == 0.018211273295547531)
+        XCTAssert(y[0,1] == 0.24519181293507392)
+        XCTAssert(y[0,2] == 0.73659691376937864)
+        XCTAssert(y[1,0] == 0.018211273295547531)
+        XCTAssert(y[1,1] == 0.24519181293507392)
+        XCTAssert(y[1,2] == 0.73659691376937864)
+    }
+    
+    func testSoftMax3() {
         let y = softmax(Tensor<Double>(Matrix<Double>([[1010], [1000],[990]])))
-        XCTAssert(y[0, 0] == 0.99995460007033099)
-        XCTAssert(y[1, 0] == 4.5397868608866649e-05)
-        XCTAssert(y[2, 0] == 2.0610600462090622e-09)
+        XCTAssert(y[0, 0] == 1.0)
+        XCTAssert(y[1, 0] == 1.0)
+        XCTAssert(y[2, 0] == 1.0)
     }
     
 //    func testLoadMNIST() {
