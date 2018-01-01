@@ -30,6 +30,12 @@
 		918F69671FF8C05E005F158B /* TwoLayerNet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 918F69661FF8C05E005F158B /* TwoLayerNet.swift */; };
 		91A77DA91F93541E00BF2738 /* Activation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91A77DA81F93541E00BF2738 /* Activation.swift */; };
 		91A77DAB1F93558A00BF2738 /* Network.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91A77DAA1F93558A00BF2738 /* Network.swift */; };
+		91B0EAF21FFA66FB009ACD2A /* Affine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91B0EAF11FFA66FB009ACD2A /* Affine.swift */; };
+		91B0EAF41FFA6A03009ACD2A /* Tensor+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91B0EAF31FFA6A03009ACD2A /* Tensor+Extension.swift */; };
+		91B0EAF61FFA6A68009ACD2A /* SoftMaxWithLoss.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91B0EAF51FFA6A68009ACD2A /* SoftMaxWithLoss.swift */; };
+		91B0EAF81FFA6A92009ACD2A /* Relu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91B0EAF71FFA6A92009ACD2A /* Relu.swift */; };
+		91B0EAFA1FFA6B02009ACD2A /* NumbericGradient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91B0EAF91FFA6B02009ACD2A /* NumbericGradient.swift */; };
+		91B0EAFC1FFA6B29009ACD2A /* CrossEntropy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91B0EAFB1FFA6B29009ACD2A /* CrossEntropy.swift */; };
 		91CEA6361FE9383200BB601B /* Random.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91CEA6351FE9383200BB601B /* Random.swift */; };
 		91CEA6381FE938B500BB601B /* Network2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91CEA6371FE938B500BB601B /* Network2.swift */; };
 /* End PBXBuildFile section */
@@ -72,6 +78,12 @@
 		91A77DA51F934D4100BF2738 /* Surge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Surge.framework; path = Carthage/Build/iOS/Surge.framework; sourceTree = "<group>"; };
 		91A77DA81F93541E00BF2738 /* Activation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Activation.swift; sourceTree = "<group>"; };
 		91A77DAA1F93558A00BF2738 /* Network.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Network.swift; sourceTree = "<group>"; };
+		91B0EAF11FFA66FB009ACD2A /* Affine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Affine.swift; sourceTree = "<group>"; };
+		91B0EAF31FFA6A03009ACD2A /* Tensor+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Tensor+Extension.swift"; sourceTree = "<group>"; };
+		91B0EAF51FFA6A68009ACD2A /* SoftMaxWithLoss.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoftMaxWithLoss.swift; sourceTree = "<group>"; };
+		91B0EAF71FFA6A92009ACD2A /* Relu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Relu.swift; sourceTree = "<group>"; };
+		91B0EAF91FFA6B02009ACD2A /* NumbericGradient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NumbericGradient.swift; sourceTree = "<group>"; };
+		91B0EAFB1FFA6B29009ACD2A /* CrossEntropy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrossEntropy.swift; sourceTree = "<group>"; };
 		91CEA6351FE9383200BB601B /* Random.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Random.swift; sourceTree = "<group>"; };
 		91CEA6371FE938B500BB601B /* Network2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Network2.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -140,6 +152,12 @@
 				9124B97F1F934242002E91CD /* Gate.swift */,
 				91A77DAA1F93558A00BF2738 /* Network.swift */,
 				91CEA6371FE938B500BB601B /* Network2.swift */,
+				91B0EAF71FFA6A92009ACD2A /* Relu.swift */,
+				91B0EAF51FFA6A68009ACD2A /* SoftMaxWithLoss.swift */,
+				91B0EAF11FFA66FB009ACD2A /* Affine.swift */,
+				91B0EAF31FFA6A03009ACD2A /* Tensor+Extension.swift */,
+				91B0EAF91FFA6B02009ACD2A /* NumbericGradient.swift */,
+				91B0EAFB1FFA6B29009ACD2A /* CrossEntropy.swift */,
 				918F69661FF8C05E005F158B /* TwoLayerNet.swift */,
 				918F69641FF8A20A005F158B /* SimpleNet.swift */,
 				91CEA6351FE9383200BB601B /* Random.swift */,
@@ -299,19 +317,25 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				91B0EAF21FFA66FB009ACD2A /* Affine.swift in Sources */,
 				91343FDB1FEF9FB500E5BDF7 /* MulLayer.swift in Sources */,
 				918F69651FF8A20A005F158B /* SimpleNet.swift in Sources */,
 				9146F0AF1FA9D5BD00769F8F /* loss.swift in Sources */,
 				91CEA6381FE938B500BB601B /* Network2.swift in Sources */,
 				910DBF4D1FC714B300AE8EF2 /* MNIST.swift in Sources */,
 				9153C5961FF6B49C003A5E88 /* Random2.swift in Sources */,
+				91B0EAF41FFA6A03009ACD2A /* Tensor+Extension.swift in Sources */,
+				91B0EAFA1FFA6B02009ACD2A /* NumbericGradient.swift in Sources */,
 				9124B9621F934226002E91CD /* ViewController.swift in Sources */,
 				910DBF4F1FC71E8100AE8EF2 /* MNISTData.swift in Sources */,
 				91A77DA91F93541E00BF2738 /* Activation.swift in Sources */,
+				91B0EAFC1FFA6B29009ACD2A /* CrossEntropy.swift in Sources */,
 				9124B9801F934242002E91CD /* Gate.swift in Sources */,
 				9124B9601F934226002E91CD /* AppDelegate.swift in Sources */,
+				91B0EAF61FFA6A68009ACD2A /* SoftMaxWithLoss.swift in Sources */,
 				918F69671FF8C05E005F158B /* TwoLayerNet.swift in Sources */,
 				910DBF4A1FC70ECF00AE8EF2 /* softmax.swift in Sources */,
+				91B0EAF81FFA6A92009ACD2A /* Relu.swift in Sources */,
 				91A77DAB1F93558A00BF2738 /* Network.swift in Sources */,
 				91CEA6361FE9383200BB601B /* Random.swift in Sources */,
 			);

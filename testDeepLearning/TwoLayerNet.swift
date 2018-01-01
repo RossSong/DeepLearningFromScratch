@@ -108,74 +108,18 @@ class TwoLayerNet {
 
         // backward
         let dy = (y - t) / batchNum
-        grads["W2"] = transpose(z1) * dy
+        //grads["W2"] = transpose(z1) * dy
+        grads["W2"] = z1.T * dy
         grads["b2"] = sumA(dy.elements)//Upsurge.sum(dy.elements)//sum(dy)
 
-        let da1 = dy * transpose(W2!)
+        //let da1 = dy * transpose(W2!)
+        let da1 = dy * W2!.T
         let dz1 = sigmoid_grad(x: a1).elements * da1.elements
         
-        grads["W1"] = transpose(x) * Tensor<Double>(dz1.toMatrix(rows: a1.dimensions[0], columns: a1.dimensions[1]))
+        //grads["W1"] = transpose(x) * Tensor<Double>(dz1.toMatrix(rows: a1.dimensions[0], columns: a1.dimensions[1]))
+        grads["W1"] = x.T * Tensor<Double>(dz1.toMatrix(rows: a1.dimensions[0], columns: a1.dimensions[1]))
         grads["b1"] = sumA(dz1)//Upsurge.sum(dz1)//sum(Tensor<Double>(Matrix<Double>(rows: da1.dimensions[0], columns: da1.dimensions[1], elements: dz1)))
 
         return grads
     }
 }
-
-func sumA(_ x: ValueArray<Double>) -> Double {
-    var total: Double = 0.0
-    for i in 0..<x.count {
-        total = total + x[i]
-    }
-    
-    return total
-}
-
-func *(lhs: Tensor<Double>, rhs: Tensor<Double>) -> Tensor<Double> {
-    let left = Matrix<Double>(rows: lhs.dimensions[0], columns: lhs.dimensions[1], elements: lhs.elements)
-    let right = Matrix<Double>(rows: rhs.dimensions[0], columns: rhs.dimensions[1], elements: rhs.elements)
-    let ret = left * right
-    return Tensor<Double>(ret)
-}
-
-func +(lhs: Tensor<Double>, rhs: Tensor<Double>) -> Tensor<Double> {
-    let out = lhs.copy()
-    
-    for i in 0..<out.dimensions[0] {
-        for j in 0..<out.dimensions[1] {
-            out[i, j] = out[i, j] + rhs.elements[j]
-        }
-    }
-    
-    return out
-}
-
-func -(lhs: Tensor<Double>, rhs: Tensor<Double>) -> Tensor<Double> {
-    let out = lhs.copy()
-    
-    for i in 0..<out.dimensions[0] {
-        for j in 0..<out.dimensions[1] {
-            out[i, j] = out[i, j] - rhs.elements[j]
-        }
-    }
-    
-    return out
-}
-
-func *(lhs: Double, rhs: Tensor<Double>) -> Tensor<Double> {
-    let right = Matrix<Double>(rows: rhs.dimensions[0], columns: rhs.dimensions[1], elements: rhs.elements)
-    let ret = right.elements * lhs
-    return Tensor<Double>(Matrix<Double>(rows: rhs.dimensions[0], columns: rhs.dimensions[1], elements: ret))
-}
-
-func /(lhs: Tensor<Double>, rhs: Double) -> Tensor<Double> {
-    let left = Matrix<Double>(rows: lhs.dimensions[0], columns: lhs.dimensions[1], elements: lhs.elements)
-    let ret = left.elements / rhs
-    return Tensor<Double>(Matrix<Double>(rows: lhs.dimensions[0], columns: lhs.dimensions[1], elements: ret))
-}
-
-func -(lhs: Double, rhs: Tensor<Double>) -> Tensor<Double> {
-    let right = Matrix<Double>(rows: rhs.dimensions[0], columns: rhs.dimensions[1], elements: rhs.elements)
-    let ret = -1 * right.elements + lhs
-    return Tensor<Double>(Matrix<Double>(rows: rhs.dimensions[0], columns: rhs.dimensions[1], elements: ret))
-}
-

@@ -233,46 +233,46 @@ class testDeepLearningTests: XCTestCase {
         if doXCTAssert(ret[1], 8.14814390531427e-10) { XCTFail() }
     }
     
-    func getTrainBatch(_ x_train: Tensor<Double>, _ t_train: Tensor<Double>, _ batchSize: Int ) -> (ValueArray<Double>, ValueArray<Double>) {
+    func getTrainBatch(_ x_train: Tensor<Double>, _ t_train: Tensor<Double>, _ batchSize: Int, inputSize: Int, outputSize: Int) -> (ValueArray<Double>, ValueArray<Double>) {
         var array = Array<Int>()
         for _ in 0..<batchSize {
-            array.append(Int(arc4random_uniform(UInt32(x_train.elements.count / 784))))
+            array.append(Int(arc4random_uniform(UInt32(x_train.elements.count / inputSize))))
         }
         
-        let x_batch = ValueArray<Double>(capacity: 784 * batchSize)
+        let x_batch = ValueArray<Double>(capacity: inputSize * batchSize)
         for i in 0..<batchSize {
-            for k in 0..<784 {
-                x_batch.append(x_train.elements[array[i] * 784 + k])
+            for k in 0..<inputSize {
+                x_batch.append(x_train.elements[array[i] * inputSize + k])
             }
         }
         
-        let t_batch = ValueArray<Double>(capacity: 10 * batchSize)
+        let t_batch = ValueArray<Double>(capacity: outputSize * batchSize)
         for i in 0..<batchSize {
-            for k in 0..<10 {
-                t_batch.append(t_train.elements[array[i] * 10 + k])
+            for k in 0..<outputSize {
+                t_batch.append(t_train.elements[array[i] * outputSize + k])
             }
         }
         
         return (x_batch, t_batch)
     }
     
-    func getTestBatch(_ x_test: Tensor<Double>, _ t_test: Tensor<Double>, _ batchSize: Int ) -> (ValueArray<Double>, ValueArray<Double>) {
+    func getTestBatch(_ x_test: Tensor<Double>, _ t_test: Tensor<Double>, _ batchSize: Int, inputSize: Int, outputSize: Int) -> (ValueArray<Double>, ValueArray<Double>) {
         var array = Array<Int>()
         for _ in 0..<batchSize {
-            array.append(Int(arc4random_uniform(UInt32(x_test.elements.count / 784))))
+            array.append(Int(arc4random_uniform(UInt32(x_test.elements.count / inputSize))))
         }
         
-        let x_test_batch = ValueArray<Double>(capacity: 784 * batchSize)
+        let x_test_batch = ValueArray<Double>(capacity: inputSize * batchSize)
         for i in 0..<batchSize {
-            for k in 0..<784 {
-                x_test_batch.append(x_test.elements[array[i] * 784 + k])
+            for k in 0..<inputSize {
+                x_test_batch.append(x_test.elements[array[i] * inputSize + k])
             }
         }
         
-        let t_test_batch = ValueArray<Double>(capacity: 10 * batchSize)
+        let t_test_batch = ValueArray<Double>(capacity: outputSize * batchSize)
         for i in 0..<batchSize {
-            for k in 0..<10 {
-                t_test_batch.append(t_test.elements[array[i] * 10 + k])
+            for k in 0..<outputSize {
+                t_test_batch.append(t_test.elements[array[i] * outputSize + k])
             }
         }
         
@@ -382,8 +382,8 @@ class testDeepLearningTests: XCTestCase {
         
         var trainLossList = Array<Double>()
         let itersNum = 10000
-        let batchSize = 1
-        let learningRate: Double = 1
+        let batchSize = 10
+        let learningRate: Double = 0.1
         for _ in 0..<itersNum {
             var array = Array<Int>()
             for _ in 0..<batchSize {
@@ -407,8 +407,8 @@ class testDeepLearningTests: XCTestCase {
             let tensorXBatch = Tensor<Double>(Matrix<Double>(rows: batchSize, columns: 784, elements: x_batch))
             let tensorTBatch = Tensor<Double>(Matrix<Double>(rows: batchSize, columns: 10, elements: t_batch))
             
-            let grad = network.numerical_gradient(x: tensorXBatch, t: tensorTBatch)
-            //let grad = network.gradient(x: tensorXBatch, t: tensorTBatch)
+            //let grad = network.numerical_gradient(x: tensorXBatch, t: tensorTBatch)
+            let grad = network.gradient(x: tensorXBatch, t: tensorTBatch)
             
             for key in grad.keys {
                 if let item = network.params[key], let itemGrad = (grad[key] as? Tensor<Double>) {
@@ -495,25 +495,12 @@ class testDeepLearningTests: XCTestCase {
         
     }*/
     
-    func testAffine() {
-        let tensorW1 = Tensor<Double>(Matrix<Double>([[2], [1]]))
-        let tensorB1 = Tensor<Double>(Matrix<Double>([[0, 0, 0]]))
-        let tensorX = Tensor<Double>(Matrix<Double>([[1, 2]]))
-        
-        let network = Affine(W: tensorW1, b: tensorB1)
-        let tensorY = network.forward(x: tensorX)
-        let dout = Tensor<Double>(Matrix<Double>([[0.1]]))
-        let ret = network.backward(dout: dout)
-        
-        debugPrint(ret.elements)
-    }
-    
     func testRandom() {
         let randW1 = MyRandomGenerator.randn(inputSize: 2, outputSize: 4)
         debugPrint(randW1.elements)
     }
     
-    
+    /*
     func testSimpleNet() {
         let net = simpleNet()
         debugPrint(net.W.elements)
@@ -550,6 +537,7 @@ class testDeepLearningTests: XCTestCase {
 //            debugPrint("loss: \(ret)")
 //        }
     }
+    */
     
     /*
     func testTwoLayerNet() {
@@ -574,12 +562,20 @@ class testDeepLearningTests: XCTestCase {
     
     func testTwoLayerNetForMNIST() {
         let ((x_train, t_train), (x_test, t_test)) = load_mnist(flatten: true, normalize: true, one_hot_label: true)
-        let network = TwoLayerNet(inputSize: 784, hiddenSize: 50, outputSize: 10)
+//        let x_train = Tensor<Double>(Matrix<Double>([[1,2],[3,4]]))
+//        let t_train = Tensor<Double>(Matrix<Double>([[1,0],[0,1]]))
+        
+//        let inputSize = 2
+//        let outputSize = 2
+//        let network = TwoLayerNet(inputSize: inputSize, hiddenSize: 3, outputSize: outputSize)
+        let inputSize = 784
+        let outputSize = 10
+        let network = TwoLayerNet(inputSize: inputSize, hiddenSize: 50, outputSize: outputSize)
         
         // 하이퍼파라미터
         let itersNum = 10000  // 반복 횟수를 적절히 설정한다.
 //        let trainSize = x_train.dimensions[0]
-        let batchSize = 100   // 미니배치 크기
+        let batchSize = 2   // 미니배치 크기
         let learningRate: Double = 0.1
         
 //        train_loss_list = []
@@ -587,33 +583,28 @@ class testDeepLearningTests: XCTestCase {
 //        test_acc_list = []
         
         // 1에폭당 반복 수
-        let iterPerEpoch = 100//max(trainSize / batchSize, 1)
+        let iterPerEpoch = 10//max(trainSize / batchSize, 1)
         
         for i in 0..<itersNum {
             // 미니배치 획득
-            let (x_batch, t_batch) = getTrainBatch(x_train, t_train, batchSize)
-            let (x_test_batch, t_test_batch) = getTestBatch(x_test, t_test, batchSize)
+            let (x_batch, t_batch) = getTrainBatch(x_train, t_train, batchSize, inputSize: inputSize, outputSize: outputSize)
+            let (x_test_batch, t_test_batch) = getTestBatch(x_test, t_test, batchSize, inputSize: inputSize, outputSize: outputSize)
             ///
-            let tensorXBatch = Tensor<Double>(Matrix<Double>(rows: batchSize, columns: 784, elements: x_batch))
-            let tensorTBatch = Tensor<Double>(Matrix<Double>(rows: batchSize, columns: 10, elements: t_batch))
-            let tensorXTestBatch = Tensor<Double>(Matrix<Double>(rows: batchSize, columns: 784, elements: x_test_batch))
-            let tensorTTestBatch = Tensor<Double>(Matrix<Double>(rows: batchSize, columns: 10, elements: t_test_batch))
+            let tensorXBatch = Tensor<Double>(Matrix<Double>(rows: batchSize, columns: inputSize, elements: x_batch))
+            let tensorTBatch = Tensor<Double>(Matrix<Double>(rows: batchSize, columns: outputSize, elements: t_batch))
+            let tensorXTestBatch = Tensor<Double>(Matrix<Double>(rows: batchSize, columns: inputSize, elements: x_test_batch))
+            let tensorTTestBatch = Tensor<Double>(Matrix<Double>(rows: batchSize, columns: outputSize, elements: t_test_batch))
             
             // 기울기 계산
-            //grad = network.numerical_gradient(x_batch, t_batch)
+            //let grad = network.numericalGradientA(x: tensorXBatch, t: tensorTBatch)
             let grad = network.gradient(x: tensorXBatch, t: tensorTBatch)
-        
+            
             // 매개변수 갱신
             for key in ["W1", "b1", "W2", "b2"] {
                 if let item = network.params[key], let itemGrad = (grad[key] as? Tensor<Double>) {
                     item.elements = item.elements - learningRate * itemGrad.elements
                 }
             }
-//            for key in ["W1", "b1", "W2", "b2"] {
-//                if let item = network.params[key], let itemGrad = (grad[key] as? Tensor<Double>) {
-//                    item.elements = item.elements - learningRate * itemGrad.elements
-//                }
-//            }
         
             // 학습 경과 기록
             let loss = network.loss(x: tensorXBatch, t: tensorTBatch)
@@ -626,6 +617,7 @@ class testDeepLearningTests: XCTestCase {
                 //                trainAccList.append(trainAcc)
                 //                testAccList.append(testAcc)
                 debugPrint("accuracy - \(trainAcc), \(testAcc)")
+//                debugPrint("accuracy - \(trainAcc)")
             }
         }
     }
@@ -642,5 +634,23 @@ class testDeepLearningTests: XCTestCase {
         let ret = sigmoid_grad(x: x)
         XCTAssert(((1 - 0.52497918747894) * 0.52497918747894) == ret[0,0])
         XCTAssert(((1 - 0.549833997312478) * 0.549833997312478) == ret[0,1])
+    }
+    
+    func testAffine() {
+        let W = Tensor<Double>(Matrix<Double>([[1,2],[3,4]]))
+        let b = Tensor<Double>(Matrix<Double>([[0, 0]]))
+        let x = Tensor<Double>(Matrix<Double>([[1,2],[3,4]]))
+        let aff = Affine(W: W, b: b)
+        
+        var ret = aff.forward(x: x)
+        XCTAssert(ret[0,0] == 7)
+        XCTAssert(ret[0,1] == 10)
+        XCTAssert(ret[1,0] == 15)
+        XCTAssert(ret[1,1] == 22)
+        
+        let dout = Tensor<Double>(Matrix<Double>([[0.5, 0.6]]))
+        ret = aff.backward(dout: dout.elements)
+        XCTAssert(ret[0,0] == 1.7)
+        XCTAssert(ret[0,1] == 3.9)
     }
 }
