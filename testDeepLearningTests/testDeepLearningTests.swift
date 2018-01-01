@@ -134,20 +134,19 @@ class testDeepLearningTests: XCTestCase {
         XCTAssert(-8.2656501655803289 == ret)
     }
     
-    func testReluForword() {
-        let x = Tensor<Double>(Matrix([[-1, -2, 3]]))
-        let y = Relu().forward(x: x)
+    func testRelu() {
+        let r = Relu()
+        var x = Tensor<Double>(Matrix([[-1, -2, 3]]))
+        var y = r.forward(x: x)
         XCTAssert(0 == y[0,0])
         XCTAssert(0 == y[0,1])
         XCTAssert(3 == y[0,2])
-    }
-    
-    func testReluBackword() {
-        let x = Tensor<Double>(Matrix([[-1, -2, 3]]))
-        let y = Relu().backward(dout: x)
+        
+        x = Tensor<Double>(Matrix([[5, 6, 9]]))
+        y = r.backward(dout: x)
         XCTAssert(0 == y[0,0])
         XCTAssert(0 == y[0,1])
-        XCTAssert(3 == y[0,2])
+        XCTAssert(9 == y[0,2])
     }
     
     func loss(W: Tensor<Double>) -> Double {
