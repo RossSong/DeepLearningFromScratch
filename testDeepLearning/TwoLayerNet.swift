@@ -105,30 +105,25 @@ class TwoLayerNet {
         // backward
         let dy = (y - t) / batchNum
         grads["W2"] = transpose(z1) * dy
-        grads["b2"] = sum(dy)
+        grads["b2"] = sumA(dy.elements)//Upsurge.sum(dy.elements)//sum(dy)
 
         let da1 = dy * transpose(W2!)
         let dz1 = sigmoid_grad(x: a1).elements * da1.elements
         
         grads["W1"] = transpose(x) * Tensor<Double>(dz1.toMatrix(rows: a1.dimensions[0], columns: a1.dimensions[1]))
-        grads["b1"] = sum(Tensor<Double>(Matrix<Double>(rows: da1.dimensions[0], columns: da1.dimensions[1], elements: dz1)))
+        grads["b1"] = sumA(dz1)//Upsurge.sum(dz1)//sum(Tensor<Double>(Matrix<Double>(rows: da1.dimensions[0], columns: da1.dimensions[1], elements: dz1)))
 
         return grads
     }
 }
 
-func sum(_ x: Tensor<Double>) -> Tensor<Double> {
-    let ret = ValueArray<Double>(capacity: x.dimensions[0])
-    for i in 0..<x.dimensions[0] {
-        var total: Double = 0
-        for j in 0..<x.dimensions[1] {
-            total = total + x[i,j]
-        }
-        
-        ret.append(total)
+func sumA(_ x: ValueArray<Double>) -> Double {
+    var total: Double = 0.0
+    for i in 0..<x.count {
+        total = total + x[i]
     }
     
-    return Tensor<Double>(Matrix<Double>(rows: x.dimensions[0], columns: 1, elements: ret))
+    return total
 }
 
 func *(lhs: Tensor<Double>, rhs: Tensor<Double>) -> Tensor<Double> {

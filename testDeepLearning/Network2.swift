@@ -132,7 +132,7 @@ class Affine {
     var b: Tensor<Double>
     var x: Tensor<Double>?
     var dW: Tensor<Double>?
-    var db: Tensor<Double>?
+    var db: Double = 0.0
     
     init(W: Tensor<Double>, b: Tensor<Double>) {
         self.W = W
@@ -167,17 +167,7 @@ class Affine {
         let tmp = transposeX * mDout
         self.dW = Tensor(tmp)
         
-        let tDb = Tensor<Double>(dimensions: [dout.dimensions[1], dout.dimensions[0]])
-        
-        for i in 0..<dout.dimensions[0] {
-            var total: Double = 0
-            for j in 0..<dout.dimensions[1] {
-                total = total + dout[i,j]
-            }
-            tDb[0, i] = total
-        }
-        
-        self.db = tDb
+        self.db = sumA(dout.elements)
         
         return Tensor<Double>(dx)
     }
