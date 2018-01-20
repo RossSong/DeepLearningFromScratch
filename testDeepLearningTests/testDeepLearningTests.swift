@@ -322,6 +322,7 @@ class testDeepLearningTests: XCTestCase {
          }
     }
     
+    /*
     func testGradient() {
         debugPrint("start..")
         let ((x_train, t_train), (x_test, t_test)) = load_mnist(flatten: true, normalize: true, one_hot_label: true)
@@ -380,6 +381,7 @@ class testDeepLearningTests: XCTestCase {
         //save(network)
         debugPrint("end.")
     }
+ */
     
     /*
     func testNetwork2() {
@@ -518,6 +520,69 @@ class testDeepLearningTests: XCTestCase {
     }
     */
     
+    func testTwoLayerNetForMNIST() {
+        let ((x_train, t_train), (x_test, t_test)) = load_mnist(flatten: true, normalize: true, one_hot_label: true)
+        //        let x_train = Tensor<Double>(Matrix<Double>([[1,2],[3,4]]))
+        //        let t_train = Tensor<Double>(Matrix<Double>([[1,0],[0,1]]))
+        
+        //        let inputSize = 2
+        //        let outputSize = 2
+        //        let network = TwoLayerNet(inputSize: inputSize, hiddenSize: 3, outputSize: outputSize)
+        let inputSize = 784
+        let hiddenSize = 50
+        let outputSize = 10
+        let network = Network2(inputSize: inputSize, hiddeSize: hiddenSize, outputSize: outputSize)
+        
+        // 하이퍼파라미터
+        let itersNum = 10000  // 반복 횟수를 적절히 설정한다.
+        //        let trainSize = x_train.dimensions[0]
+        let batchSize = 100  // 미니배치 크기
+        let learningRate: Double = 0.1
+        
+        //        train_loss_list = []
+        //        train_acc_list = []
+        //        test_acc_list = []
+        
+        // 1에폭당 반복 수
+        let iterPerEpoch = 10//max(trainSize / batchSize, 1)
+        
+        for i in 0..<itersNum {
+            // 미니배치 획득
+            let (x_batch, t_batch) = getTrainBatch(x_train, t_train, batchSize, inputSize: inputSize, outputSize: outputSize)
+            let (x_test_batch, t_test_batch) = getTestBatch(x_test, t_test, batchSize, inputSize: inputSize, outputSize: outputSize)
+            ///
+            let tensorXBatch = Tensor<Double>(Matrix<Double>(rows: batchSize, columns: inputSize, elements: x_batch))
+            let tensorTBatch = Tensor<Double>(Matrix<Double>(rows: batchSize, columns: outputSize, elements: t_batch))
+            let tensorXTestBatch = Tensor<Double>(Matrix<Double>(rows: batchSize, columns: inputSize, elements: x_test_batch))
+            let tensorTTestBatch = Tensor<Double>(Matrix<Double>(rows: batchSize, columns: outputSize, elements: t_test_batch))
+            
+            // 기울기 계산
+            //let grad = network.numericalGradientA(x: tensorXBatch, t: tensorTBatch)
+            let grad = network.gradient(x: tensorXBatch, t: tensorTBatch)
+            
+            // 매개변수 갱신
+            for key in ["W1", "b1", "W2", "b2"] {
+                if let item = network.params[key], let itemGrad = (grad[key] as? Tensor<Double>) {
+                    item.elements = item.elements - learningRate * itemGrad.elements
+                }
+            }
+            
+            // 학습 경과 기록
+            let loss = network.loss(x: tensorXBatch, t: tensorTBatch)
+            //train_loss_list.append(loss)s
+            debugPrint("loss: \(loss)")
+            
+            if 0 == i % iterPerEpoch {
+                let trainAcc = network.accuracy(x: tensorXBatch, t: tensorTBatch)
+                let testAcc = network.accuracy(x: tensorXTestBatch, t: tensorTTestBatch)
+                //                trainAccList.append(trainAcc)
+                //                testAccList.append(testAcc)
+                debugPrint("accuracy - \(trainAcc), \(testAcc)")
+                //                debugPrint("accuracy - \(trainAcc)")
+            }
+        }
+    }
+    
     /*
     func testTwoLayerNetForMNIST() {
         let ((x_train, t_train), (x_test, t_test)) = load_mnist(flatten: true, normalize: true, one_hot_label: true)
@@ -580,7 +645,7 @@ class testDeepLearningTests: XCTestCase {
             }
         }
     }
- */
+    */
     
     func testSigmoid() {
         let x = Tensor<Double>(Matrix<Double>([[0.1, 0.2]]))
